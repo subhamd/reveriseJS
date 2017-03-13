@@ -1,0 +1,11 @@
+{
+  "presets": [ ["es2015", { modules: false }], "stage-0"],
+  "env": {
+    "development": {
+      "plugins": ["transform-decorators-legacy"]
+    },
+    "production": {
+      "plugins": ["transform-decorators-legacy"]
+    }
+  }
+}
