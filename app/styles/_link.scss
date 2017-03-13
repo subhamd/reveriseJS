@@ -1,0 +1,38 @@
+//identify types of list and create classes
+
+a.link {
+  color: get-background-color('peterriver');
+  font-weight: bold;
+}
+
+a.external-link {
+  display: inline-block;
+  font-weight: bold;
+  margin: 1em 0;
+
+  &:hover:after {
+    transform: translateX(.25em);
+    opacity: 1;
+  }
+
+  @include icon-append($fa-var-caret-right) {
+    font-size: 1em;
+    vertical-align: middle;
+    margin-left: .25em;
+    opacity: .5;
+    transition: opacity .3s, transform .3s;
+    transform: translateX(0);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+//

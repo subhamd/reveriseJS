@@ -1,0 +1,384 @@
+/*
+ Follow codyhouse design and the use of soft shadow around the buttons
+ */
+
+/**
+ * Button colors:
+ * `.background__{color-scheme}` - applies a color scheme to a button.
+ * **For list of available
+ * color scheme please refer to the color schemes section in this document.**
+ *
+ *     @example
+ *     div.row
+ *       a(href="#").button.background__peterriver PETER RIVER
+ *       a(href="#").button.background__pomegranate POMEGRANATE
+ *       a(href="#").button.background__amethyst AMETHYST
+ *       a(href="#").button.background__carrot CARROT
+ *
+ */
+@each $scheme-name in map-keys($color-schemes) {
+
+  $color: get-content-color($scheme-name);
+  $background: get-background-color($scheme-name);
+
+  .button.background__#{$scheme-name},
+  .button__ghost.background__#{$scheme-name} {
+    color: $color;
+    background-color: $background;
+    border:solid 2px $background;
+    //box-shadow: 0 0 20px rgba($background, .2);
+
+    &:hover {
+      color: $color;
+      background-color: lighten($background, 5%);
+      border-color:lighten($background, 5%);
+    }
+
+    &:active,&.active {
+      color: darken($color, 2%);
+      background-color: darken($background, 5%);
+      border-color:darken($background, 5%);
+    }
+  }
+
+  .button__ghost.background__#{$scheme-name} {
+    background-color: transparent;
+    color:$background;
+  }
+}
+
+@mixin normal-colors {
+  color:$content-color__normal;
+  background-color: #CCC;
+  border:solid 2px transparent;
+  box-shadow: 0 0 20px transparent;
+
+  //normal styles for ghost button
+  &__ghost {
+    border-width:2px;
+    border-color:#CCC;
+    background-color: transparent;
+  }
+
+  &:hover {
+    color:#111;
+    background-color: #DDD;
+    border-color:#DDD;
+  }
+
+  &:active, &.active {
+    color: #000;
+    background-color: #AAA;
+    border-color:#AAA;
+  }
+}
+
+
+@mixin invert-colors {
+  color:#DDD;
+  background-color: #000;
+  border:solid 2px #000;
+
+  &:hover {
+    color:#FFF;
+    background-color: #444;
+    border-color: #444;
+  }
+
+  &:active, &.active {
+    color: #EEE;
+    background-color: #111;
+    border-color: #111;
+  }
+}
+
+@mixin light-variant {
+  color:rgba(white, .7);
+  background-color: rgba(white, .1);
+
+  &:hover {
+    color:rgba(black, .6);
+    background-color: rgba(white, 1);
+  }
+
+  &:active,&.active {
+    color:rgba(white, .9);
+    background-color: rgba(white, .3);
+  }
+}
+
+@mixin dark-variant {
+  color:rgba(white, .6);
+  background-color: rgba(black, .3);
+
+  &:hover {
+    color:rgba(white, .8);
+    background-color: rgba(black, 1);
+    border-color: #000;
+  }
+
+  &:active,&.active {
+    color:rgba(white, 1);
+    background-color: rgba(black, .2);
+  }
+}
+
+
+/**
+ * Button:
+ * `.button` - base class for button elements. Can be added to anchor tags or button elements
+ *
+ *     @example
+ *     a.button(href="#")="NORMAL"
+ */
+.button {
+  position: relative;
+  display: inline-block;
+  padding: .5em 1em;
+  margin: 0 .5em;
+  min-width: 6em;
+  white-space: nowrap;
+  cursor: default;
+
+  font-size: 14px;
+  text-align: center;
+
+  font-weight: bold;
+
+  outline:none;
+  appearance:none;
+  border-radius: 3px;
+
+  transition: all .3s;
+
+  &:disabled, &[disabled] {
+    opacity: .5;
+  }
+
+  @include normal-colors;
+
+  /**
+   * Block button:
+   * `.button__block` - button with display type block and width 100%
+   *
+   *     @example
+   *     a.button.button__block(href="#") BLOCK BUTTON
+   */
+  &__block {
+    display: block;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  /**
+   * Icon Button:
+   * `.button.button__icon` - button with only a icon content and no text
+   *
+   *     @example
+   *     a.button.button__icon(href="#")
+   *       i.icon__fa.icon--send
+   */
+  &__icon {
+    min-width: 3em;
+  }
+
+
+  /**
+   * Button with icon:
+   * `.button.button__with-icon` - button with icon
+   *
+   *     @example
+   *     a.button.button__with-icon(href="#")
+   *       i.icon__fa.icon--send
+   *       span SEND
+   */
+  &__with-icon {
+    display: inline-table;
+    padding: 0;
+    overflow: hidden;
+
+    span {
+      display: table-cell;
+      padding: .5em;
+      font-weight: bold;
+
+      &:first-child {
+        padding-left: 1em;
+      }
+
+      &:last-child {
+        padding-right: 1em;
+      }
+    }
+
+    .icon__fa {
+      display: table-cell;
+      text-align: center;
+      vertical-align: middle;
+      width: 2.6em;
+    }
+  }
+
+  /**
+   * Button with dropdown menu
+   */
+  &__with-dropdown {
+    position: relative;
+    .dropdown {
+      position: static !important;
+    }
+  }
+
+  /**
+   * Only content of the button is drop down component
+   */
+  &__dropdown {
+    min-width: 1em;
+    position: relative;
+    .dropdown {
+      position: static;
+      > i {
+        font-size: 1em;
+      }
+    }
+  }
+
+  /**
+   * Button sizes:
+   * `.button.button__medium` - Medium sized button.
+   * Other possible modifier could be `.button.button__big` for big sized button.
+   * By not specifying any size modifier classes the button will assume default style
+   *
+   *
+   *     @example
+   *     a.button(href="#") NORMAL
+   *     a.button.button__medium(href="#") MEDIUM
+   *     a.button.button__big(href="#") BIG
+   */
+  &__medium {
+    font-size: 16px;
+    min-width: 6em;
+  }
+  &__big {
+    font-size: 18px;
+  }
+
+
+  /**
+   * Light Button:
+   * `.button.button__light` - suitable for buttons on darker background.
+   *
+   *
+   *
+   *     @example
+   *     div.gradient__joomla.padded-area
+   *       a.button.button__light(href="#") LIGHT BUTTON
+   *       a.button.button__light.button__ghost-light(href="#") LIGHT GHOST
+   *
+   */
+  &__light,
+  &__ghost-light {
+    font-weight: bold;
+    border:none;
+    @include light-variant;
+  }
+
+  &__ghost-light {
+    border:solid 2px rgba(white, .4);
+    background-color: transparent;
+    &:active { border-color: rgba(white, .8); }
+    &:hover { border-color:rgba(white, .8); }
+  }
+
+
+  /* corners */
+  &__rect {
+    border-radius: 0;
+  }
+
+
+  /**
+   * Inverted Button:
+   * `.button.button__inverted` - button with dark background.
+   *
+   *
+   *
+   *     @example
+   *     div.gradient__blush.padded-area
+   *       a.button.button__inverted(href="#") INVERTED BUTTON
+   *
+   */
+  &__inverted {
+    @include invert-colors;
+  }
+
+
+  /**
+   * Dark Button:
+   * `.button.button__inverted` - button with dark transparent background. can be also
+   * used with the class `.button__ghost-dark`.
+   *
+   *
+   *
+   *     @example
+   *     div.gradient__haikus.padded-area
+   *       a.button.button__dark(href="#") DARK BUTTON
+   *       a.button.button__dark.button__ghost-dark(href="#") DARK BUTTON
+   *
+   */
+  &__dark,
+  &__ghost-dark {
+    font-weight: bold;
+    border:none;
+    @include dark-variant;
+  }
+
+  &__ghost-dark {
+    border:solid 2px rgba(black, .6);
+  }
+
+}
+
+
+
+.btn-group {
+  font-size: 0;
+  white-space: nowrap;
+
+  .button {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+
+  .button.rounded {
+    border-radius:0;
+  }
+
+  .button:first-child {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+  }
+  .button:last-child {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+
+  .button:nth-child(n+1) {
+    margin-left: -1px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//

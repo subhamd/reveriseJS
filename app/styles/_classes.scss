@@ -1,0 +1,55 @@
+
+/* container for floated element */
+.clearfix {
+  &:before, &:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+%vertical-middle {
+  display: block;
+  position: absolute;
+  top:50%;
+  transform: translateY(-50%);
+}
+
+%horizontal-middle {
+  display: block;
+  position: absolute;
+  left:50%;
+  transform: translateX(-50%);
+}
+
+%centered {
+  display: block;
+  position: absolute;
+  left:50%;
+  top:50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+@media all and (min-width:$device-width__medium) {
+  .hide-l { display: none !important; }
+}
+
+@media all and (max-width:$device-width__medium) {
+  .hide-m { display: none !important; }
+}
+
+@media all and (min-width:0px) and (max-width: $device-width__small) {
+  .hide-s { display: none !important; }
+}
+
+
+
+
+
+
+
+
+
+//

@@ -1,0 +1,207 @@
+/**
+  Size options for feature blocks
+ */
+
+$feature-block--sizes: (
+  'small': 32px,
+  'medium': 48px,
+  'big': 64px,
+  'large': 96px,
+  'x-large': 128px,
+  'xx-large': 256px
+);
+
+/**
+ * Feature Block:
+ * `.feature-block` - feature block is micro layout with one or two icons and a content area
+ * arranged in different configurations.
+ *
+ * Following classes can be applied to `.feature-block` root element.
+ * - `.feature-block__stacked` - when applied the layout sections are stacked vertically, default
+ *   behaviour is to align icon/contents horizontally.
+ *
+ * `.feature-block--icon` can have the following classes applied to control icon size and position
+ * - `.feature-block--icon__small`
+ * - `.feature-block--icon__medium`
+ * - `.feature-block--icon__big`
+ * - `.feature-block--icon__large`
+ * - `.feature-block--icon__x-large`
+ * - `.feature-block--icon__xx-large`
+ * - `.feature-block--icon__top`
+ * - `.feature-block--icon__middle`
+ * - `.feature-block--icon__bottom`
+ * - `.feature-block--icon__left`
+ * - `.feature-block--icon__right`
+ *
+ * The left or right position of the icon is determined based on
+ * whether `.feature-block--icon` comes before `.feature-block--content` tag
+ * or after. in non stacked configuration. The `.feature-block--icon__left` and `.feature-block--icon__right`
+ * is applicable only when `.feature-block__stacked` is applied.
+ *
+ *
+ *
+ *     @example
+ *     div.row.background__peterriver
+ *       div.span-l6
+ *         div.feature-block
+ *           div.feature-block--icon.feature-block--icon__top
+ *             img(src="images/flake-icon.png")
+ *           div.feature-block--content
+ *             h2.feature-block--content--header The default feature block
+ *             p.feature-block--content--mixed Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad.
+ *       div.span-l6
+ *         div.feature-block.feature-block__stacked
+ *           div.feature-block--icon.feature-block--icon__small.feature-block--icon__top
+ *             img(src="images/flake-icon.png")
+ *           div.feature-block--content
+ *             h2.feature-block--content--header Stacked feature block with icon at top
+ *             p.feature-block--content--mixed Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad.
+ *
+ *     div.row.background__pomegranate
+ *       div.span-l6
+ *         div.feature-block
+ *           div.feature-block--icon.feature-block--icon__bottom
+ *             img(src="images/flake-icon.png")
+ *           div.feature-block--content
+ *             h2.feature-block--content--header Icon at bottom
+ *             p.feature-block--content--mixed Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad.
+ *       div.span-l6
+ *         div.feature-block.feature-block__stacked
+ *           div.feature-block--content
+ *             h2.feature-block--content--header Stacked feature block with icon at bottom
+ *             p.feature-block--content--mixed Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad.
+ *           div.feature-block--icon.feature-block--icon__small.feature-block--icon__bottom
+ *             img(src="images/flake-icon.png")
+ *     div.row.background__amethyst
+ *       div.span-l6
+ *         div.feature-block.feature-block__stacked
+ *           div.feature-block--icon.feature-block--icon__center
+ *             img(src="images/flake-icon.png")
+ *           div.feature-block--content
+ *             h2.feature-block--content--header Stacked centered
+ *             p.feature-block--content--mixed Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad.
+ *       div.span-l6
+ *         div.feature-block.feature-block__stacked
+ *           div.feature-block--content
+ *             h2.feature-block--content--header Stacked centered bottom
+ *             p.feature-block--content--mixed Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad.
+ *           div.feature-block--icon.feature-block--icon__center
+ *             img(src="images/flake-icon.png")
+ *
+ */
+.feature-block {
+  display: table;
+  width: 100%;
+  text-align: left;
+  
+  &--icon {
+    display: table-cell;
+    text-align: center;
+
+    img,svg,.icon__fa {
+      width: map-get($feature-block--sizes, 'medium'); //default size
+    }
+
+    @each $size in map-keys($feature-block--sizes) {
+      &__#{$size} {
+        img,svg,.icon__fa {
+          width: map-get($feature-block--sizes, $size);
+        }
+      }
+    }
+
+    &__top {
+      vertical-align: top;
+    }
+
+    &__bottom {
+      vertical-align: bottom;
+    }
+
+    &__middle {
+      vertical-align: middle;
+    }
+  }
+
+  &--content {
+    display: table-cell;
+    padding: 0 1rem;
+
+    &__ta-left { text-align: left;}
+    &__ta-right { text-align: right;}
+    &__ta-center { text-align: center;}
+    &__ta-justify { text-align: justify;}
+
+    &--header { margin: 0; }
+
+    &--mixed { margin-top: 0; }
+  }
+
+  //stacked feature blocks will have all the elements stacked vertically
+  //and the icons can have left or right alignments
+  &__stacked {
+    >.feature-block--icon {
+      display: block;
+      text-align: left;
+      //by default icon is left aligned so only define the right alignment styles
+      &__right {
+        text-align: right;
+        padding: 0;
+      }
+
+      &__center {
+        display: table;
+        margin: auto;
+      }
+    }
+
+    >.feature-block--content { display: block; padding: 1rem 0;}
+  }
+
+}
+
+
+/**
+  Take advantage of flexbox whenever available
+ */
+.flexbox {
+  .feature-block {
+    display: flex;
+
+    &__stacked {
+      flex-direction: column !important;
+
+      >.feature-block--icon {
+
+        &__right {
+          text-align: right !important;
+        }
+      }
+      >.feature-block--content { display: block; padding-left: 0; }
+    }
+
+    &--icon {
+      &__top {
+        align-self: flex-start;
+      }
+
+      &__bottom {
+        align-self: flex-end;
+      }
+
+      &__middle {
+        align-self: center;
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+//

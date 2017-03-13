@@ -1,0 +1,120 @@
+/* configuration */
+$content-width: 1400px;
+$separator-color:rgba(black, .2);
+
+/**
+ * Content Structure:
+ * `.page` - Basic page structure. Wrap any page level section contents within `.content-wrap`
+ * to prevent their width to grow indefinitely on larger screen.
+ *
+ *     @example
+ *     // <body>
+ *     div.page
+ *       header
+ *         div.content-wrap header
+ *       main
+ *         div.content-wrap main
+ *       section
+ *         div.content-wrap section 1
+ *       section
+ *         div.content-wrap section 2
+ *       footer
+ *         div.content-wrap footer
+ *     //</body>
+ */
+ // content width restriction
+ .content-wrap {
+   @extend .row;
+   margin: auto;
+   max-width: $content-width;
+   padding: 1em 0;
+ }
+
+.page {
+  width:100%;
+  display: block;
+  position: relative;
+
+  /*
+    page lavel sections
+  */
+  > header,
+  > main,
+  > section,
+  > footer {
+    // section with no padding
+    &.tight {
+      padding: 0;
+    }
+
+    //section with separator
+    &.separator {
+      border-bottom: solid 1px $separator-color;
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+  }
+
+}
+
+
+/**
+ * Centered container:
+ * `.centered-container__wrap` - Container which center aligns horizonlay and vertically the only child element
+ * with class `.centered--item`
+ *
+ *     @example
+ *     div.centered-container__wrap.background__wisteria(style="height:200px")
+ *       div.centered--item.background__amethyst(style="width:50px;height:50px")
+ */
+ .flexbox {
+   .centered-container__wrap {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+
+     &:before {
+       content:'';
+       display: none;
+     }
+   }
+ }
+
+ /* table based fallback https://css-tricks.com/centering-in-the-unknown/ */
+.centered-container__wrap {
+  display: table;
+  width: 100%;
+  text-align: center;
+  font-size: 0;
+
+  &:before {
+    content: '\200B';
+    /*   content: '';
+    margin-left: -0.25em; */
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+
+  //by applying auto margin we get horizontally aligned
+  .centered--item {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px; //fallback for ie8
+    font-size: 1rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+//

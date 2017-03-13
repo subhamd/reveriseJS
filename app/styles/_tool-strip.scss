@@ -1,0 +1,39 @@
+
+.tool-strip {
+  display: table;
+  width:100%;
+
+  &--segment {
+    display: table-cell;
+    vertical-align: top;
+
+    >a {
+      display: inline-block;
+      padding: .5em .5em;
+      opacity: .6;
+      transition: opacity .3s;
+      border-radius: 3px;
+
+      &:hover { opacity: 1; }
+
+      >[class^=icon] {
+        width:1em;
+        text-align: center;
+      }
+    }
+
+    &__left {
+      text-align: left;
+    }
+
+    &__right {
+      text-align: right;
+    }
+  }
+}
+
+
+
+
+
+//

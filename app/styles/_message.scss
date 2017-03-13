@@ -1,0 +1,40 @@
+.message {
+  display: block;
+  padding: 1em;
+  border-radius: 5px;
+  width: 100%;
+
+  .hilight {
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(black, 0.1);
+    padding: 0.1em .5em;
+    border-radius: 100px;
+    display: inline-block;
+    margin: 5px 0;
+  }
+
+  &.success {
+    background-color: rgba(#1abc9c, .1);
+    color: #1abc9c;
+    border: solid 1px rgba(#1abc9c, .2);
+  }
+
+  &.info {
+    background-color: rgba(#3498db, .1);
+    color: #3498db;
+    border: solid 1px rgba(#3498db, .2);
+  }
+
+  &.warning {
+    background-color: rgba(#e67e22, .1);
+    color: #e67e22;
+    border: solid 1px rgba(#e67e22, .2);
+  }
+
+  &.error {
+    background-color: rgba(#e74c3c, .1);
+    color: #e74c3c;
+    border: solid 1px rgba(#e74c3c, .2);
+  }
+
+}

@@ -1,0 +1,64 @@
+/**
+ * Info Block:
+ * `.info-block` - Info block provides a way to show important sections of information in a page
+ * ,this block should be used in page level sections only.
+ *
+ *
+ *     @example
+ *     div.info-block.gradient__twitch
+ *       div.info-block--icon
+ *         img(src="images/vector-icons/calendar-regular.svg")
+ *       p.info-block--content Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+ *       div.info-block--secondary-content
+ *         a(href="#").button.button__light.button__medium.button__ghost SUBSCRIBE
+ */
+.info-block {
+  display: table;
+  padding: 2rem 1rem;
+
+  &--icon {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0 2rem;
+    -webkit-filter:invert(100%);
+
+    img {
+      width: 80px;
+    }
+  }
+
+  &--content {
+    display: table-cell;
+    vertical-align: top;
+    font-size: 1.5em;
+  }
+
+  &--secondary-content {
+    display: table-cell;
+    padding: 0 1rem;
+    max-width: 300px;
+    text-align: right;
+    vertical-align: middle;
+  }
+
+  @media all and (max-width: $device-width__medium) {
+    .info-block--icon,
+    .info-block--content,
+    .info-block--secondary-content { display: block;}
+    .info-block--secondary-content {
+      text-align: left;
+      padding: 1em 0;
+      >.button {
+        margin-left: 0;
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+//

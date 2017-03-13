@@ -1,0 +1,66 @@
+/* Changes selection style, instead of accepting arguments
+  this mixin will accept contents which will be emited properly.
+ */
+@mixin selection {
+  /* Mozilla based browsers */
+  &::-moz-selection {
+   @content;
+  }
+
+  /* Works in Safari */
+  &::selection {
+    @content;
+  }
+}
+
+/* Can be used to style placeholders, as the above mixin it will accept content */
+@mixin placeholder {
+  &::-webkit-input-placeholder {
+   @content;
+  }
+  &:-moz-placeholder { /* Firefox 18- */
+     @content;
+  }
+  &::-moz-placeholder {  /* Firefox 19+ */
+     @content;
+  }
+  &:-ms-input-placeholder {
+     @content;
+  }
+}
+
+/* use for scrollbar corner styling */
+@mixin scrollbar-corner {
+  &::-webkit-scrollbar-corner {
+    @content;
+  }
+}
+
+/* use for scrollbar width and height */
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    @content;
+  }
+}
+
+/* use for scrollbar track styling */
+@mixin scrollbar-track {
+  &::-webkit-scrollbar-track {
+    @content;
+  }
+}
+
+/* use for scrollbar thumb styling */
+@mixin scrollbar-thumb {
+  &::-webkit-scrollbar-thumb {
+    @content;
+  }
+}
+
+
+
+
+
+
+
+//

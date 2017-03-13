@@ -1,0 +1,41 @@
+/**
+ * Clients:
+ * `.clients` - The clients list.
+ *
+ *     @example
+ *     div.clients.background__white
+ *       div.item
+ *         img(src="images/logos/alienware-logo.png")
+ *       div.item
+ *         img(src="images/logos/rog-logo.png")
+ *       div.item
+ *         img(src="images/logos/hp-logo.png")
+ *       div.item
+ *         img(src="images/logos/razer-logo.png")
+ */
+.clients {
+  display: block;
+  text-align: center;
+
+  .item {
+    display: inline-block;
+    width:120px;
+    height: 100px;
+    overflow: hidden;
+    opacity: .7;
+    transition: all .3s;
+    margin-right: -4px;
+    margin-bottom: -3px;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    img {
+      margin: auto;
+      max-width: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+}

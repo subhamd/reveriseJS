@@ -1,0 +1,129 @@
+$panel--section-height: 40px;
+
+
+
+/**
+ * Penel:
+ * `.panel` - The panel component. `.background__*` classes can be applied to panel as well, as illustrated in the example.
+ *
+ *     @example
+ *     div.row
+ *       div.span-l6
+ *         div.panel.background__peterriver
+ *           div.panel--header Panel header
+ *             div.panel--header--actions
+ *               a
+ *                 i.icon__fa.icon--chevron-down
+ *               a
+ *                 i.icon__fa.icon--bars
+ *           div.panel--content
+ *             h2 Panel content title
+ *             p Invest in apps, not ops. Heroku handles the hard stuff — patching and upgrading, 24/7 ops and security, build systems, failovers, and more — so your developers can stay focused on building great apps.
+ *           div.panel--footer Panel footer section
+ *       div.span-l6
+ *         div.panel
+ *           div.panel--header Panel with buttons in the footer
+ *             div.panel--header--actions
+ *               a
+ *                 i.icon__fa.icon--chevron-down
+ *               a
+ *                 i.icon__fa.icon--bars
+ *           div.panel--content
+ *             h2 Panel content title
+ *             p Invest in apps, not ops. Heroku handles the hard stuff — patching and upgrading, 24/7 ops and security, build systems, failovers, and more — so your developers can stay focused on building great apps.
+ *           div.panel--footer.panel--footer__buttons
+ *             a.button Send
+ *             a.button Receive
+ *             a.button Discard
+ *
+ */
+.panel {
+  border-radius: 3px;
+  overflow: hidden;
+  border:solid 1px rgba(black, .15);
+
+  //panel color rules
+  @each $scheme-name in map-keys($color-schemes) {
+    $color-scheme: map-get($color-schemes, $scheme-name);
+    $background-color: nth($color-scheme, 1);
+    $content-color: nth($color-scheme, 2);
+
+    &.background__#{$scheme-name} {
+      background-color: transparent;
+      color:$content-color__normal;
+      border:solid 1px $background-color;
+
+      .panel--header, .panel--footer {
+        background-color: $background-color;
+        color:$content-color;
+      }
+    }
+  }
+
+  &--header, &--footer {
+    position: relative;
+    height: $panel--section-height;
+    background-color: rgba(black, .1);
+    line-height: $panel--section-height;
+  }
+
+  &--header {
+    font-weight: bold;
+    text-indent: 1em;
+
+    //collection of action buttons
+    &--actions {
+      position: absolute;
+      display: table;
+      right:0;
+      top:0;
+
+      >a {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        text-indent: 0;
+        width:2em;
+        opacity: .6;
+        transition: opacity .3s;
+        &:hover { opacity: .9;}
+
+        //i.icon__fa
+      }
+    }
+  }
+
+  &--content {
+    padding: 1em;
+    h1,h2,h3,h4,h5,h6 {
+      padding: 0;
+      margin: .1em 0;
+    }
+  }
+
+  &--footer {
+    text-align: center;
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+
+    &__buttons {
+      display: table;
+      background-color: transparent;
+      width: 100%;
+
+      >.button {
+        display: table-cell;
+        padding: 0;
+        border-radius: 0;
+
+        &:last-child:not(:only-child) {
+          border-bottom-right-radius: inherit;
+        }
+
+        &:first-child:not(:only-child) {
+          border-bottom-left-radius: inherit;
+        }
+      }
+    }
+  }
+}

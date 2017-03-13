@@ -1,0 +1,122 @@
+
+
+$box-sizes: (
+  "nano" :(.25rem),
+  "micro":(.5rem),
+  "small":(1rem),
+  "medium":(1.5rem),
+  "big":(2rem),
+  "large":(2.5rem),
+  "huge":(3rem),
+  "layout": (8rem)
+);
+
+$depth: (
+  "nano" :10px,
+  "micro":20px,
+  "small":30px,
+  "medium":40px,
+  "big":50px,
+  "large":60px,
+  "huge":70px,
+  "layout": 80px
+);
+
+$box-sides: ("left", "top", "bottom", "right");
+
+@each $size-name in map-keys($box-sizes) {
+  .padding__#{$size-name} {
+    padding: nth(map-get($box-sizes, $size-name), 1);
+  }
+  .margin__#{$size-name} {
+    margin: nth(map-get($box-sizes, $size-name), 1);
+  }
+
+  .padding__vertical__#{$size-name} {
+    padding-top: nth(map-get($box-sizes, $size-name), 1);
+    padding-bottom: nth(map-get($box-sizes, $size-name), 1);
+  }
+  .margin__vertical__#{$size-name} {
+    margin-top: nth(map-get($box-sizes, $size-name), 1);
+    margin-bottom: nth(map-get($box-sizes, $size-name), 1);
+  }
+
+  @each $box-side in $box-sides {
+    .padding__#{$box-side}__#{$size-name} {
+      padding-#{$box-side}: nth(map-get($box-sizes, $size-name), 1);
+    }
+
+    .margin__#{$box-side}__#{$size-name} {
+      margin-#{$box-side}: nth(map-get($box-sizes, $size-name), 1);
+    }
+  }
+}
+
+.box-top-center {
+  margin: 0 auto;
+}
+
+// padding disable for sides
+.no-padding- {
+  @each $box-side in $box-sides {
+    &#{$box-side} { padding-#{$box-side}: 0 !important; }
+  }
+}
+
+//margin disable for sides
+.no-margin- {
+  @each $box-side in $box-sides {
+    &#{$box-side} { margin-#{$box-side}: 0 !important; }
+  }
+}
+
+.no-border {
+  border:0 !important;
+}
+
+.no-margin {
+  margin:0 !important;
+}
+
+.no-padding {
+  padding: 0 !important;
+}
+
+.tight {
+  margin: 0;
+  padding: 0;
+}
+
+.border-radius {
+  border-radius: 3px;
+}
+
+
+// to apply shadow
+.depth {
+  @each $depth-size in map-keys($depth) {
+    &__#{$depth-size} {
+      box-shadow: 0 map-get($depth, $depth-size) 30px rgba(black, .1);
+    }
+  }
+}
+
+
+@for $i from 1 through 12 {
+  .transition-index-#{$i} {
+    transition-delay: $i * .15s;
+  }
+}
+
+.hover-depth {
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(black, .02);
+  transform: translateY(0) scale(1);
+  transition: box-shadow .5s ease, transform .5s ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-5px) scale(1.005);
+    box-shadow: 0 15px 30px rgba(black, .1);
+  }
+}

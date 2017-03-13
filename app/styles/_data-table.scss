@@ -1,0 +1,78 @@
+$table-border-color: #EAEAEA;
+
+.data-table {
+  width:100%;
+
+  .data-table--header {
+    display: table;
+    width: 100%;
+    border-right:solid 1px $table-border-color;
+
+    .data-table--cell {
+      display: table-cell;
+      font-weight: bold;
+      font-size: 1.1em;
+      padding: 1em .5em;
+    }
+  }
+
+  .data-table--body {
+    > div:last-child .data-table--row {
+      border-bottom: solid 1px $table-border-color;
+    }
+  }
+
+  .data-table--row {
+    display: table;
+    width: 100%;
+    border-right:solid 1px $table-border-color;
+    background-color: white;
+    //cursor: pointer;
+
+    transition: all .3s ease-in;
+
+    .data-table--cell {
+      display: table-cell;
+    }
+
+    &:hover {
+      //background-color: rgba(green, .2);
+    }
+  }
+
+  // common cell style
+  .data-table--cell {
+    padding: .5em;
+    border-top:solid 1px $table-border-color;
+    border-left:solid 1px $table-border-color;
+    vertical-align: middle;
+
+    @for $i from 1 through 12 {
+      &.span-#{$i} {
+        width: $i / 12 * 100%;
+      }
+    }
+
+    @media all and (max-width: $device-width__medium) {
+      display: block !important;
+      width: 100% !important;
+    }
+  }
+
+  .data-table--row--details {
+    border:solid 1px $table-border-color;
+    background-color: rgba(green, .05);
+  }
+}
+
+// to be moved to
+.overview-col {
+  @media all and (max-width: $device-width__medium) {
+    text-align: center;
+    background-color: rgba(black, .05);
+  }
+}
+
+
+
+//

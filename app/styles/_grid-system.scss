@@ -1,0 +1,212 @@
+/**
+ * Grid System:
+ * `.row` - Float based grid system
+ *
+ * - `.span-l[column span]` column class for large devices
+ * - `.span-m[column span]` column class for medium sized devices
+ * - `.span-s[column span]` column class for small sized devices
+ *
+ * For responsive columns use multiple of above classes.
+ *
+ *     @example
+ *     div.styledown-grid-demo
+ *       div.row
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *         div.span-l1 span-l1
+ *       div.row
+ *         div.span-l2 span-l2
+ *         div.span-l2 span-l2
+ *         div.span-l2 span-l2
+ *         div.span-l2 span-l2
+ *         div.span-l2 span-l2
+ *         div.span-l2 span-l2
+ *       div.row
+ *         div.span-l3 span-l3
+ *         div.span-l3 span-l3
+ *         div.span-l3 span-l3
+ *         div.span-l3 span-l3
+ *       div.row
+ *         div.span-l4 span-l4
+ *         div.span-l4 span-l4
+ *         div.span-l4 span-l4
+ *       div.row
+ *         div.span-l5 span-l5
+ *         div.span-l7 span-l7
+ *       div.row
+ *         div.span-l6 span-6
+ *         div.span-l6 span-6
+ */
+.row {
+  @extend .clearfix;
+  position: relative;
+  box-sizing: border-box;
+
+  padding: 0 .5em;
+
+  /* common style for columns */
+  >[class^=span] {
+    float:left;
+    position: relative;
+    box-sizing: border-box;
+    padding: .5em;
+  }
+
+  /* right aligned column */
+  >[class^=span].right {
+    float: right;
+  }
+
+  /* default 12 column styles, applied to large screens */
+  @for $i from 1 through 12 {
+    >.span-l#{$i} {
+      width: (100% * $i / 12);
+    }
+    >.push-l#{$i} { left:(100% / 12 * $i); }
+    >.pull-l#{$i} { left:-(100% / 12 * $i); }
+  }
+
+  /* hide on large screen */
+  .hide-l { display: none; }
+}
+
+/* right row will align all child columns to right */
+.row.rigth {
+  >[class^=span] { float: right;  }
+}
+
+
+/* medium devices, 992px and below */
+@media screen and(max-width: $device-width__medium) {
+  .row {
+    @for $i from 1 through 12 {
+      >.span-m#{$i} {
+        width: (100% * $i / 12);
+      }
+      >.push-m#{$i} { left:(100% / 12 * $i); }
+      >.pull-m#{$i} { left:-(100% / 12 * $i); }
+    }
+  }
+  .hide-m { display:none; }
+}
+
+
+/* small devices, 768px and below */
+@media screen and(max-width: $device-width__small) {
+  .row {
+    @for $i from 1 through 12 {
+      >.span-s#{$i} {
+        width: (100% * $i / 12);
+      }
+      >.push-s#{$i} { left:(100% / 12 * $i); }
+      >.pull-s#{$i} { left:-(100% / 12 * $i); }
+    }
+  }
+  .hide-s { display: none; }
+}
+
+/**
+ * Grid System (Table Based):
+ * `.grid` - table based grid system.
+ * Use table based grid only when equal height columns are needed. This grid system is very basic and
+ * does not support all the features that float based grid system supports.
+ *
+ *     @example
+ *     div.styleguide-table-grid-demo
+ *       div.grid__table
+ *         div.grid--row
+ *           div.grid--column.grid--column__span-3 grid--column__span-3
+ *           div.grid--column.grid--column__span-3 grid--column__span-3
+ *           div.grid--column.grid--column__span-3 grid--column__span-3
+ *           div.grid--column.grid--column__span-3 grid--column__span-3
+ *         div.grid--row
+ *           div.grid--column.grid--column__span-4 grid--column__span-4
+ *           div.grid--column.grid--column__span-4 grid--column__span-4
+ *           div.grid--column.grid--column__span-4 grid--column__span-4
+ *         div.grid--row
+ *           div.grid--column.grid--column__span-6 grid--column__span-6
+ *           div.grid--column.grid--column__span-6 grid--column__span-6
+ *
+ */
+.grid {
+  $grid--border-color:rgba(black, .2);
+
+  &__table {
+   display: block;
+   width:100%;
+
+   //content alignment
+   &.grid__content-vertical-align-top {
+     .grid--column { vertical-align: top; }
+   }
+   &.grid__content-vertical-align-middle {
+     .grid--column { vertical-align: middle; }
+   }
+   &.grid__content-vertical-align-bottom {
+     .grid--column { vertical-align: bottom; }
+   }
+
+
+   // inner bordered and all bordered grids
+   &.grid__bordered {
+     border-collapse: collapse;
+
+     .grid--column {
+       border:solid 1px  $grid--border-color;
+
+       &__item-vertical-align-top { vertical-align: top !important; }
+       &__item-vertical-align-middle { vertical-align: middle !important; }
+       &__item-vertical-align-bottom { vertical-align: bottom !important; }
+     }
+   }
+
+   &.grid__inner-bordered {
+     border-collapse: collapse;
+     border-style: hidden;
+
+     .grid--column {
+       border:solid 1px  $grid--border-color;
+     }
+   }
+
+   //grid row
+   .grid--row {
+     display: table;
+     width:100%;
+   }
+
+   //auto column
+   .grid--column {
+     display: table-cell;
+
+     //sized columns
+     @for $i from 1 through 12 {
+       &__span-#{$i} {
+         width: (100% * $i / 12);
+       }
+     }
+   }
+ }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//

@@ -1,0 +1,26 @@
+.preloade {
+  $border-width: 1px;
+  $spinner-width: 2em;
+  z-index: 99999;
+
+  &__spinner {
+    width: $spinner-width;
+    height: $spinner-width;
+    border-radius: 100%;
+    border-top:solid $border-width rgba(black, .05);
+    border-bottom:solid $border-width rgba(black, .05);
+    border-left:solid $border-width rgba(black, .05);
+    border-right:solid $border-width rgba(black, .5);
+    animation: spinner__rotate .5s infinite linear;
+    position: absolute;
+    left:50%;
+    margin-left: -($spinner-width / 2);
+    top:50%;
+    margin-top: -($spinner-width / 2);
+  }
+}
+
+@keyframes spinner__rotate {
+  from { transform: rotate(0deg) }
+  to { transform: rotate(360deg) }
+}

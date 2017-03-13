@@ -1,0 +1,269 @@
+/**
+  Content shades
+ */
+ $content-color__normal:#666;
+ $content-color__light: #888;
+ $content-color__strong: #222;
+
+ /* theme text color */
+ $content-color__theme: #FF6666;
+ $title-color__theme: #888;
+
+ $content-color__normal__inverse: rgba(white, .8);
+ $content-color__light__inverse: rgba(white, .6);
+ $content-color__strong__inverse: rgba(white, 1);
+
+
+/**
+ * Colors:
+ * `.background__* type__*` - Color scheme for background and type(text).
+ *
+ *     @example
+ *     div.styleguide--color-swatch
+ *       div.item.background__turquoise
+ *         span turquoise
+ *         br
+ *         span (#1abc9c)
+ *       div.item.background__greensea
+ *         span greensea
+ *         br
+ *         span (#16a085)
+ *       div.item.background__sunflower
+ *         span sunflower
+ *         br
+ *         span (#f1c40f)
+ *       div.item.background__orange
+ *         span orange
+ *         br
+ *         span (#f39c12)
+ *       div.item.background__emerald
+ *         span emerald
+ *         br
+ *         span (#2ecc71)
+ *       div.item.background__nephritis
+ *         span nephritis
+ *         br
+ *         span (#27ae60)
+ *       div.item.background__carrot
+ *         span carrot
+ *         br
+ *         span (#e67e22)
+ *       div.item.background__pumpkin
+ *         span pumpkin
+ *         br
+ *         span  (#d35400)
+ *       div.item.background__peterriver
+ *         span peterriver
+ *         br
+ *         span (#3498db)
+ *       div.item.background__belizehole
+ *         span belizehole
+ *         br
+ *         span (#2980b9)
+ *       div.item.background__alizarin
+ *         span alizarin
+ *         br
+ *         span (#e74c3c)
+ *       div.item.background__pomegranate
+ *         span pomegranate
+ *         br
+ *         span (#c0392b)
+ *       div.item.background__amethyst
+ *         span amethyst
+ *         br
+ *         span (#9b59b6)
+ *       div.item.background__wisteria
+ *         span wisteria
+ *         br
+ *         span (#8e44ad)
+ *       div.item.background__clouds
+ *         span clouds
+ *         br
+ *         span (#ecf0f1)
+ *       div.item.background__silver
+ *         span silver
+ *         br
+ *         span (#bdc3c7)
+ *       div.item.background__wetasphalt
+ *         span wetasphalt
+ *         br
+ *         span (#34495e)
+ *       div.item.background__midnightblue
+ *         span midnightblue
+ *         br
+ *         span (#2c3e50)
+ *       div.item.background__concrete
+ *         span concrete
+ *         br
+ *         span (#95a5a6)
+ *       div.item.background__asbestos
+ *         span asbestos
+ *         br
+ *         span (#7f8c8d)
+ *       div.item.background__white
+ *         span white
+ *         br
+ *         span (#FFF)
+ */
+$color-schemes: (
+  "turquoise": (#1abc9c, $content-color__strong__inverse),
+  "greensea": (#16a085, $content-color__strong__inverse),
+  "sunflower": (#f1c40f, $content-color__strong__inverse),
+  "orange": (#f39c12, $content-color__strong__inverse),
+  "emerald": (#2ecc71, $content-color__strong__inverse),
+  "nephritis": (#27ae60, $content-color__strong__inverse),
+  "carrot": (#e67e22, $content-color__strong__inverse),
+  "pumpkin": (#d35400, $content-color__strong__inverse),
+  "peterriver": (#3498db, $content-color__strong__inverse),
+  "belizehole": (#2980b9, $content-color__strong__inverse),
+  "alizarin": (#e74c3c, $content-color__strong__inverse),
+  "pomegranate": (#c0392b, $content-color__strong__inverse),
+  "amethyst": (#9b59b6, $content-color__strong__inverse),
+  "wisteria": (#8e44ad, $content-color__strong__inverse),
+  "clouds": (#ecf0f1,  $content-color__normal),
+  "silver": (#bdc3c7,  $content-color__normal),
+  "wetasphalt": (#34495e, $content-color__normal__inverse),
+  "midnightblue": (#2c3e50, $content-color__normal__inverse),
+  "concrete": (#95a5a6, $content-color__normal),
+  "asbestos":(#7f8c8d, white),
+  "white": (#FFF, $content-color__normal),
+  "theme": ( $content-color__theme, $content-color__normal)
+);
+
+$gradient-color-schemes:(
+  "shroomhaze": (#5C258D, #4389A2),
+  "joomla": (#1e3c72, #2a5298),
+  "haikus": (#fd746c, #ff9068),
+  "purplin": (#6a3093, #a044ff),
+  "inbox": (#457fca, #5691c8),
+  "blush": (#B24592, #F15F79),
+  "greenandblue": (#c2e59c, #64b3f4),
+  "deeppurple": (#673AB7, #512DA8),
+  "backtoearth": (#00C9FF, #92FE9D),
+  "mastercard": (#f46b45, #eea849),
+  "clearsky": (#005C97, #363795),
+  "passion": (#e53935, #e35d5b),
+  "piglet": (#ee9ca7, #ffdde1),
+  "virginamerica": (#7b4397, #dc2430),
+  "turquoiseflow": (#7b4397, #dc2430),
+  "flickr": (#7b4397, #dc2430),
+  "instagram": (#517fa4, #243949),
+  "twitch": (#6441A5, #2a0845),
+  "endlessriver": (#43cea2, #185a9d),
+  "crazyorangel": (#D38312, #A83279),
+  "facebookmassenger": (#00c6ff, #0072ff),
+  "amethyst": (#9D50BB, #6E48AA),
+  "neonlife": (#B3FFAB, #12FFF7),
+  "cherryblossoms": (#FBD3E9, #BB377D),
+  "dirtyfog": (#B993D6, #8CA6DB),
+  "reef": (#00d2ff, #3a7bd5),
+  "aqualicious": (#50C9C3, #96DEDA),
+  "alostmemory": (#DE6262, #FFB88C),
+  "daytripper": (#f857a6, #ff5858),
+  "pinotnoir": (#4b6cb7, #182848),
+  "shrimpy": (#e43a15, #e65245),
+  "influenza": (#C04848, #480048),
+  "calmdarya": (#5f2c82, #49a09d),
+  "bourbon": (#EC6F66, #F3A183),
+  "stellar": (#7474BF, #348AC7),
+  "mantle": (#24C6DC, #514A9D),
+  "seablizz": (#1CD8D2, #93EDC7),
+  "midnightcity": (#232526, #414345),
+  "moss": (#134E5E, #71B280),
+  "veniceblue": (#085078, #85D8CE),
+  "electricvoilet": (#4776E6, #8E54E9),
+  "steelgray": (#1F1C2C, #928DAB),
+  "mirage": (#16222A, #3A6073),
+  "mojito": (#1D976C, #93F9B9),
+  "cherry": (#EB3349, #F45C43),
+  "pinky": (#DD5E89, #F7BB97),
+  "seaweed": (#4CB8C4, #3CD3AD),
+  "aquamarine": (#1A2980, #26D0CE),
+  "aubergine": (#AA076B, #61045F),
+  "bloodymary": (#FF512F, #DD2476),
+  "intuitivepurple": (#DA22FF, #9733EE),
+  "80spurple": (#41295a, #2F0743),
+  "frost": (#000428, #004e92),
+  "muave": (#42275a, #734b6d),
+  "grapefruitsunset": (#e96443, #904e95)
+);
+
+
+$button-color-pairs:(
+  "turquoise": (#1abc9c, white),
+  "green-sea": (#16a085, white),
+  "sun-flower": (#f1c40f, white),
+  "orange": (#f39c12, white),
+  "emerald": (#2ecc71, white),
+  "nephritis": (#27ae60, white),
+  "carrot": (#e67e22, white),
+  "pumpkin": (#d35400, white),
+  "peter-river": (#3498db, white),
+  "belize-hole": (#2980b9, white),
+  "alizarin": (#e74c3c, white),
+  "pomegranate": (#c0392b, white),
+  "amethyst": (#9b59b6, white),
+  "wisteria": (#8e44ad, white),
+  "clouds": (#ecf0f1, #333),
+  "silver": (#bdc3c7, #333),
+  "wet-asphalt": (#34495e, white),
+  "midnight-blue": (#2c3e50, white),
+  "concrete": (#95a5a6, #333),
+  "asbestos":(#7f8c8d, #333)
+);
+
+/**
+  Generate classes for different color schemes
+ */
+@each $scheme-name in map-keys($color-schemes) {
+  //for each color scheme
+  $color-scheme: map-get($color-schemes, $scheme-name);
+
+  //get the color pairs
+  $background-color: nth($color-scheme, 1);
+  $content-color: nth($color-scheme, 2);
+
+  //class defination
+  .background__#{$scheme-name} {
+    background-color: $background-color;
+    color:$content-color;
+  }
+
+  .type__#{$scheme-name} {
+    color: $background-color;
+  }
+}
+
+
+/**
+ Helper mixins and functions to retrieve colors from the color schemes collection
+ */
+@function get-background-color($scheme-name) {
+ @return nth(map-get($color-schemes, $scheme-name), 1);
+}
+
+@function get-content-color($scheme-name) {
+ @return nth(map-get($color-schemes, $scheme-name), 2);
+}
+
+@mixin pick-background-color($scheme-name) {
+  background-color: get-background-color($scheme-name);
+}
+
+@mixin pick-content-color($scheme-name) {
+  color: get-content-color($scheme-name);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//

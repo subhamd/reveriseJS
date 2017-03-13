@@ -1,0 +1,90 @@
+/*
+  Gradients exported from uigradients.com,
+  Gradient backgrounds can be applied by using the classes gradint-{gradient name}
+ */
+
+ /**
+  * Gradients:
+  * `.gradient__*` - classes used to apply gradient backgrounds. Refer this example for all available gradients in the framework;
+  *
+  *     @example
+  *     div.styleguide--gradient-swatch
+  *       div.item.gradient__shroomhaze shroomhaze
+  *       div.item.gradient__joomla joomla
+  *       div.item.gradient__haikus haikus
+  *       div.item.gradient__purplin purplin
+  *       div.item.gradient__inbox inbox
+  *       div.item.gradient__blush blush
+  *       div.item.gradient__greenandblue greenandblue
+  *       div.item.gradient__deeppurple deeppurple
+  *       div.item.gradient__backtoearth backtoearth
+  *       div.item.gradient__mastercard mastercard
+  *       div.item.gradient__clearsky clearsky
+  *       div.item.gradient__passion passion
+  *       div.item.gradient__piglet piglet
+  *       div.item.gradient__virginamerica virginamerica
+  *       div.item.gradient__turquoiseflow turquoiseflow
+  *       div.item.gradient__flickr flickr
+  *       div.item.gradient__instagram instagram
+  *       div.item.gradient__twitch twitch
+  *       div.item.gradient__endlessriver endlessriver
+  *       div.item.gradient__crazyorangel crazyorangel
+  *       div.item.gradient__facebookmassenger facebookmassenger
+  *       div.item.gradient__amethyst amethyst
+  *       div.item.gradient__neonlife neonlife
+  *       div.item.gradient__cherryblossoms cherryblossoms
+  *       div.item.gradient__dirtyfog dirtyfog
+  *       div.item.gradient__reef reef
+  *       div.item.gradient__aqualicious aqualicious
+  *       div.item.gradient__alostmemory alostmemory
+  *       div.item.gradient__daytripper daytripper
+  *       div.item.gradient__pinotnoir pinotnoir
+  *       div.item.gradient__shrimpy shrimpy
+  *       div.item.gradient__influenza influenza
+  *       div.item.gradient__calmdarya calmdarya
+  *       div.item.gradient__bourbon bourbon
+  *       div.item.gradient__stellar stellar
+  *       div.item.gradient__mantle mantle
+  *       div.item.gradient__seablizz seablizz
+  *       div.item.gradient__midnightcity midnightcity
+  *       div.item.gradient__moss moss
+  *       div.item.gradient__veniceblue veniceblue
+  *       div.item.gradient__electricvoilet electricvoilet
+  *       div.item.gradient__steelgray steelgray
+  *       div.item.gradient__mirage mirage
+  *       div.item.gradient__mojito mojito
+  *       div.item.gradient__cherry cherry
+  *       div.item.gradient__pinky pinky
+  *       div.item.gradient__seaweed seaweed
+  *       div.item.gradient__aquamarine aquamarine
+  *       div.item.gradient__aubergine aubergine
+  *       div.item.gradient__bloodymary bloodymary
+  *       div.item.gradient__intuitivepurple intuitivepurple
+  *       div.item.gradient__80spurple 80spurple
+  *       div.item.gradient__frost frost
+  *       div.item.gradient__muave muave
+  *       div.item.gradient__grapefruitsunset grapefruitsunset
+  *
+  */
+@each $scheme-name in map-keys($gradient-color-schemes) {
+  //for each scheme
+  $color-scheme: map-get($gradient-color-schemes, $scheme-name);
+
+  //get the color pairs
+  $color-1: nth($color-scheme, 1);
+  $color-2: nth($color-scheme, 2);
+
+  //generate classes
+  .gradient__#{$scheme-name} {
+    color:white;
+    background-color: $color-1;
+    background: linear-gradient(to left, $color-1 , $color-2);
+  }
+}
+
+
+
+
+
+
+//

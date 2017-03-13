@@ -1,0 +1,26 @@
+table.table {
+  $border-color: #EEE;
+
+  width: 100%;
+  overflow: hidden;
+  margin: 1em auto; //temporary
+  table-layout: fixed;
+
+  border-collapse: separate;
+  border-spacing: 0;
+  border:solid 1px $border-color;
+  border-radius: 3px;
+
+  td,th {
+    padding: .5em .5em;
+    border-bottom: solid 1px $border-color;
+    border-right: solid 1px $border-color;
+    &:last-child {
+      border-right:none;
+    }
+  }
+
+  tbody tr:last-child {
+    td,th { border-bottom: none; }
+  }
+}

@@ -1,0 +1,50 @@
+// Base Class Definition
+// -------------------------
+
+/**
+  Derive from font-icon class to enable font icon on an element
+ */
+
+.#{$fa-css-prefix}__fa {
+  display: inline-block;
+  font: normal normal normal #{$fa-font-size-base}/#{$fa-line-height-base} FontAwesome; // shortening font declaration
+  font-size: inherit; // can't have font-size inherit on line above, so need to override
+  text-rendering: auto; // optimizelegibility throws things off #1094
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@mixin icon-append($icon-code) {
+  &:after {
+    content: $icon-code;
+    display: inline-block;
+    font: normal normal normal #{$fa-font-size-base}/#{$fa-line-height-base} FontAwesome; // shortening font declaration
+    font-size: inherit; // can't have font-size inherit on line above, so need to override
+    text-rendering: auto; // optimizelegibility throws things off #1094
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @content;
+  }
+}
+
+@mixin icon-prepend($icon-code) {
+  &:before {
+    content: $icon-code;
+    display: inline-block;
+    font: normal normal normal #{$fa-font-size-base}/#{$fa-line-height-base} FontAwesome; // shortening font declaration
+    font-size: inherit; // can't have font-size inherit on line above, so need to override
+    text-rendering: auto; // optimizelegibility throws things off #1094
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @content;
+  }
+}
+
+
+
+
+
+
+
+
+//

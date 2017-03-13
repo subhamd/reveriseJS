@@ -1,0 +1,494 @@
+/**
+  Nav bar base styles
+ */
+
+
+.padd__navbar-main__top {
+  padding-top: $navbar-main__height;
+}
+
+/**
+ * main nav bar exists and it is fixed type
+ */
+html.html--navbar-main.html--navbar-main__fixed {
+  /**
+   * First section under page should have a padding top then
+   */
+  div.page section:first-of-type {
+    padding-top: $navbar-main__height;
+  }
+}
+
+/**
+ * When page is scrolled
+ */
+.html--navbar-main__scrolled {
+ //scrolled navbar style
+ .navbar-main__fixed.navbar-main__transition,
+ .navbar-main.navbar-main__transition {
+   background-color: white;
+   color: $content-color__normal !important;
+   box-shadow:0 0 5px rgba(black, .1);
+
+   .navbar-main--item:hover {
+     border-bottom:solid 3px get-background-color('peterriver');
+   }
+
+   .navbar-main--hamburger-icon {
+     background-color: $content-color__theme;
+   }
+ }
+}
+
+/**
+ * Navbar:
+ * `.navbar-main` - Main top navigation bar. `.background__*` classes can be applied to navbar to customise
+ * the background of the navbar. The navbar is divided into segments each segment can contain some menu items as
+ * illustrated in the example here.
+ *
+ *     @example:
+ *     div.navbar-main.background__peterriver
+ *       div.navbar-main--segment
+ *         div.navbar-main--item.navbar-main--item__logo
+ *           h2
+ *             a(href="#") Logo
+ *       div.navbar-main--segment.navbar-main--segment__right
+ *         div.navbar-main--item
+ *           a(href="#") Home
+ *         div.navbar-main--item.navbar-main--item__has-submenu
+ *           a(href="#") Portfolio
+ *           div.navbar-main--item--submenu
+ *             div.simple-menu
+ *               ul
+ *                 li
+ *                   a(href="#") Two column
+ *                 li
+ *                   a(href="#") Three column
+ *                 li
+ *                   a(href="#") Four column
+ *         div.navbar-main--item
+ *           a(href="#") Contact
+ *     br
+ *     br
+ *     div.navbar-main.background__white
+ *       div.navbar-main--segment
+ *         div.navbar-main--item.navbar-main--item__logo
+ *           h2
+ *             a(href="#") ICON
+ *       div.navbar-main--segment.navbar-main--segment__right
+ *         div.navbar-main--item
+ *           a(href="#") Home
+ *         div.navbar-main--item.navbar-main--item__has-submenu
+ *           a(href="#") Portfolio
+ *           div.navbar-main--item--submenu
+ *             div.simple-menu
+ *               ul
+ *                 li
+ *                   a(href="#") Two column
+ *                 li
+ *                   a(href="#") Three column
+ *                 li
+ *                   a(href="#") Four column
+ *         div.navbar-main--item.navbar-main--item__icon
+ *           a(href="#")
+ *             i.icon__fa.icon--bookmark
+ *         div.navbar-main--item.navbar-main--item__icon
+ *           a(href="#")
+ *             i.icon__fa.icon--search
+ */
+.navbar-main {
+  padding: 0 !important;
+  height: $navbar-main--height;
+  line-height: $navbar-main--height;
+  transition: background .5s;
+
+  //default fixed navbar style
+  &__fixed { //temporary - should be applied to parent so that other page element knows about the nav height
+    position: fixed;
+    left:0;
+    top:0;
+    right: 0;
+    width: auto !important;
+    z-index: 111;
+
+    .mega-menu { color: $content-color__normal; }
+  }
+
+  //headers can be used inside logo section
+  h1,h2,h3,h4,h5,h6 {
+    margin: 0;
+  }
+
+  //burger menu icon
+  .navbar-main--hamburger-icon {
+    background-color: white;
+  }
+
+  /* nav segments devides the nav items into different regions */
+  &--segment {
+    padding: 0 1em;
+
+    &:first-child { padding-left: 0; }
+    &:last-child { padding-right: 0; }
+  }
+
+  /* nav items */
+  &--item {
+    position: relative;
+    padding: 0 1em;
+    line-height: inherit;
+    opacity: .8;
+    font-weight: bold;
+
+    transition: border .2s, opacity .2s;
+    border-bottom: solid 3px transparent;
+
+    &:hover {
+      border-bottom: solid 3px currentColor;
+      opacity: 1;
+    }
+
+    a {
+      display: block;
+      height: inherit;
+      line-height: inherit;
+    }
+
+    // icon item
+    &__icon,
+    &__no-border-effect {
+      border-bottom:none !important;
+      padding: 0 .25em;
+
+      &:hover {
+        border-bottom:none !important;
+      }
+
+      >a {
+        min-width: 2.8em;
+        text-align: center;
+      }
+    }
+
+    //the logo
+    &__logo {
+      //padding: 0 1em;
+      border-bottom:solid 0px !important;
+      width: $navbar-main--logo-segment__width;
+    }
+
+    //submenu div
+    &--submenu {
+      visibility: hidden;
+      position: absolute;
+      min-width: 10em;
+      top:100%;
+      margin-top:3px;
+      left:0;
+      z-index: 1122;
+      opacity: 0;
+      box-shadow: 0 10px 10px rgba(black,.2);
+      color:$content-color__normal;
+      transition: opacity .5s, transform .5s;
+
+      background-color: white;
+      border-top:solid 1px rgba(black, .05);
+      transform-origin: top;
+      transform:translateY(0px);
+    }
+
+    //when item hover happens the style of submenu
+    &:hover &--submenu {
+      visibility: visible;
+      opacity: 1;
+      transform:translateY(0);
+    }
+
+    &__has-submenu {
+      >a {
+        @include icon-append($fa-var-chevron-down) {
+          margin-left:.5em;
+          opacity: .5;
+          font-size: .8em;
+        }
+      }
+    }
+
+    //button inside nav
+    .button {
+      line-height: normal;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    //form--field inside nav
+    .form--field {
+      padding: 0;
+      .form--input-group {
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+
+
+
+
+/**
+  Flexbox implementation
+ */
+.flexbox {
+  .navbar-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+
+    &--segment {
+      display: flex;
+      align-items: stretch;
+
+      &__right {
+        margin-left: auto;
+      }
+
+      &__left {
+        margin-right: auto;
+      }
+    }
+  }
+}
+
+
+/**
+  Table fallback
+  */
+.navbar-main {
+  display: table;
+  width:100%;
+
+  &--segment {
+    display: table-cell;
+
+    &__right {
+      text-align: right;
+    }
+
+    &__left {
+      text-align: left;
+    }
+
+    &:last-child { text-align: right; }
+  }
+
+  &--item {
+    display: inline-block;
+  }
+}
+
+
+/**
+  Mobile navigation styles
+ */
+.nav-mobile {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  right:0;
+  top:0;
+  bottom: 0;
+  width: $nav--sidebar-width;
+  padding: $navbar-main--height 0 0 0 !important;
+  z-index: 1;
+  transform: translateX(100%);
+  transition: transform .3s ease-in-out;
+
+  background-color: $content-color__normal;
+
+  &--content-wrap {
+    position: absolute;
+    left:0;
+    top:$navbar-main__height;
+    bottom:0;
+    right:0;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    @include scrollbar-corner { background-color: transparent; }
+    @include scrollbar { width: 4px; }
+    @include scrollbar-track {
+      background-color: rgba(black, .6);
+      &:hover {
+        background-color: black
+      }
+    }
+    @include scrollbar-thumb {
+      background-color: get-background-color('peterriver');
+      &:hover { background-color: #AAA; }
+    }
+  }
+
+  /* common list styles */
+  ul {
+    margin: 0;
+    padding: 0;
+    color:$content-color__light__inverse;
+    list-style-type: none;
+
+    >li {
+      position: relative;
+
+      &.nav-mobile--item__has-submenu {
+        >a {
+          @include icon-append($fa-var-caret-down) {
+            position: absolute;
+            right:0;
+            top:0;
+            height: 100%;
+            width:2em;
+            text-align: center;
+            line-height: 3em;
+          }
+        }
+      }
+
+      &.nav-mobile--item__header {
+        //font-weight: bold;
+      }
+
+      &.nav-mobile--item {
+        // TODO:
+      }
+
+      >a {
+        display: block;
+        position: relative;
+        height: inherit;
+        padding: 1em 1em;
+        transition: background .3s;
+
+        &:hover {
+          background-color: rgba($content-color__light, .2);
+        }
+      }
+    }
+  }
+
+  /* immediate styles */
+  >ul {
+    font-size: 16px;
+  }
+
+  /* submenu list styles */
+  .nav-mobile--item__has-submenu {
+    >ul {
+      overflow: hidden;
+      transform-origin: top;
+      transform: scaleY(1);
+      transition: transform .4s;
+      background-color: rgba(black, .1);
+
+      >li {
+        font-size: .9em;
+        >a {
+          text-indent: 1em;
+        }
+      }
+    }
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* sidebar openning logic */
+body {
+  transition: left .3s ease-in-out, right .3s ease-in-out;
+  left:0;
+}
+
+//shift the body to reveal the side menu
+.__mobile-nav-open body {
+  @media all and (max-width: $device-width__medium) {
+    //left:-$nav--sidebar-width;
+    .nav-mobile {
+      transform: translateX(0) !important;
+    }
+  }
+}
+
+//normal style for when sidebar is open
+.__mobile-nav-open {
+  .navbar-main--hamburger-icon {
+      background-color: transparent !important;
+      &:before,&:after {
+        background-color: white;
+      }
+      &:before {
+        transform-origin: left center;
+        transform: translateY(-1px) rotate(45deg);
+        //top:0;
+      }
+      &:after {
+        transform-origin: left center;
+        transform: translateY(1px) rotate(-45deg);
+        //bottom:0;
+      }
+  }
+}
+
+//styles when sidebar is open and page is scrolled
+.__mobile-nav-open.html--navbar-main__scrolled {
+  .navbar-main--hamburger-icon {
+      background-color: transparent !important;
+      &:before,&:after {
+        background-color: $content-color__normal;
+      }
+  }
+}
+
+/*
+ * CSS hamburger menu
+ */
+.navbar-main--hamburger-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width:2em;
+  height:2px;
+  transform: translate3d(0,0,0);
+
+  &:before, &:after {
+    content: "";
+    width:inherit;
+    height:inherit;
+    background-color: inherit;
+    position: absolute;
+    left:0;
+    transition: all .3s;
+  }
+
+  &:before {
+    top:-10px;
+  }
+
+  &:after {
+    bottom:-10px;
+  }
+}
+
+
+
+
+
+
+
+//

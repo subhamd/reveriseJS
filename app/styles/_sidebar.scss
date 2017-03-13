@@ -1,0 +1,239 @@
+$list-item__height: 3em;
+
+.sidebar--header .notification {
+  color: $content-color__theme;
+}
+
+/* html classes for controlling sidebar based layout */
+html.html--sidebar-left {
+  .page {
+    padding-left: $sidebar__width;
+    transition: padding .3s;
+
+    .navbar-main__fixed {
+      left: $sidebar__width;
+      transition: left .3s;
+    }
+
+    // only for left sidebar
+    .sidebar {
+      left:0;
+      transform-origin: left;
+      border-right:solid 1px #EFEFEF;
+      transform: scaleX(1);
+    }
+
+    @media all and (max-width:$device-width__medium) {
+      padding-left:0;
+    }
+  }
+
+  .sidebar {
+    position: absolute;
+    width: $sidebar__width;
+    top:0;
+    height: 100%;
+    transition: transform .3s;
+    z-index: 111;
+
+    &__fixed {
+      position: fixed;
+      bottom: 0;
+    }
+  }
+}
+
+//layout
+.sidebar {
+  overflow: hidden;
+  background-color: #FAFAFA;
+
+  &--header {
+    height: $navbar-main__height;
+    //background-color: rgba(get-background-color('peterriver'), .1);
+    border-bottom: solid 1px #EFEFEF;
+    box-sizing: content-box;
+  }
+
+  //sidebar contents scrollable
+  &--scroll-container {
+    position: absolute;
+    top: calc($navbar-main__height + 1px);
+    left:0; right:0;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  //root as well as nested uls
+  &--nav,ul {
+    position: absolute;
+    list-style-type: none;
+    left:0;top:0;
+    height: 100%;
+    width: $sidebar__width;
+    padding: 0;
+    margin: 0;
+    transition: transform .3s cubic-bezier(.94,.02,.53,.97), opacity 1s;
+
+    &.slide-in {
+      transform: translateX(-100%);
+      >li>ul {
+        opacity: 1;
+        >li.sidebar--nav--submenu--back-button {
+          i {
+            transform: translateX(0);
+          }
+        }
+      }
+    }
+
+    //all lis
+    li {
+      display: block;
+      height: $list-item__height;
+      font-weight: bold;
+
+      //list item link
+      >a {
+        display: table;
+        width: $sidebar__width;
+        height: inherit;
+        transition: opacity .3s;
+        opacity:.5;
+        cursor: pointer;
+
+        &.active {
+          color: $content-color__theme;
+          opacity: 1;
+        }
+
+        &:hover {
+          opacity:1;
+        }
+
+        >[class^=icon],img {
+          display: table-cell;
+          width:$list-item__height;
+          vertical-align: middle;
+          text-align: center;
+          +span {
+            padding: 0 .5em;
+          }
+        }
+
+        // for some strange reason margin right is added, so here we negate that
+        >img {
+          padding: .8em;
+          margin-right: -1.9em;
+        }
+
+        >span {
+          display: table-cell;
+          vertical-align: middle;
+          padding: 0 1em;
+          width: 85%;
+          text-align: left;
+        }
+      }
+    }
+
+    li.sidebar--nav--item__header {
+      line-height: 3em;
+      padding-left: 1em;
+    }
+
+    li.sidebar--nav--item__separator {
+      border-bottom: solid 1px #F0F0F0;
+      height: 2px !important;
+      //margin: .5em 0;
+    }
+
+    li.sidebar--nav--item__secondary {
+      a, span {
+        font-weight: normal !important;
+        font-size: 14px !important;
+      }
+    }
+
+    //special style for has submenu item
+    li.sidebar--nav--item__has-submenu {
+      position: static;
+      //has submenu icon
+      >a:after {
+          content: '';
+          display: block;
+          position: absolute;
+          top:50%;
+          margin-top:-2px;
+          right:calc(6px + 1em);
+          width: 3px;
+          height:3px;
+          background-color: #333;
+          opacity: 1;
+          //the grid icon
+          box-shadow: //-6px  0px 0 white, //left
+                     6px  0px 0 #333, //right
+                     0px -6px 0 #333, //top
+                     0px  6px 0 #333; //bottom
+                    //-6px -6px 0 white, //top-left
+                     //6px -6px 0 white, //top-right,
+                    //-6px  6px 0 white, //bottom-left
+                     //6px  6px 0 white; //bottom-right
+        }
+    }
+
+    // back button
+    li.sidebar--nav--submenu--back-button > a {
+        display: block;
+        line-height: $list-item__height;
+        opacity: .3 !important;
+
+        >span {
+          text-indent: .5em;
+          text-align: left;
+          font-size: .8em;
+        }
+
+        >[class^=icon] {
+          text-indent: .5em;
+          width: 0;
+          transform: translateX(50px);
+          transition: transform .6s;
+
+          @media all and (max-width:$device-width__medium) {
+            width:$list-item__height;
+            text-indent: 0;
+          }
+        }
+    }
+
+    //all nested Uls
+    ul {
+      left:100%;
+      top:0;
+      opacity: 0;
+      visibility: hidden;
+      background-color: #FFF;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//

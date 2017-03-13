@@ -1,0 +1,467 @@
+$form--input-primary-accent: get-background-color('peterriver');
+$form--input-default-border-color: #DDD;
+$form--input-font-family: 'Lato';
+$form--input-border-radius: 3px;
+
+// helper for writting input[type=checkbox] state styles
+@mixin form--custom-check-state($state) {
+  &:#{$state} + label:before {
+    @content;
+  }
+}
+
+//shorthand for writting styles for all inputs
+@mixin all-inputs {
+  input,
+  select,
+  textarea {
+    @content;
+  }
+}
+
+// styling for inputs that look similar, in this case the edit boxes
+@mixin edit-controls {
+  input {
+    &[type=text],
+    &[type=email],
+    &[type=password],
+    &[type=number],
+    &[type=search], {
+      @content;
+    }
+  }
+}
+
+
+
+/**
+ * Form:
+ * `.form` - the form layout container. This is the root class for the form module.
+ *
+ * Some points to remember
+ * - Select inputs should be wrapped inside `.form--field--select-wrap` class.
+ * - In order to use the custom checkbox, the `input[type=checkbox]` tag should appear before the corresponding
+ * label tag and both of these tags should be wrapped inside `.form--field--toggle-input` element.
+ * - Coloured button classes can also be used inside the form field.
+ *
+ *     @example
+ *     form.form
+ *       div.row
+ *         div.form--field__static
+ *           h3 Form title
+ *       div.row
+ *         div.span-l6
+ *           div.form--field
+ *             label(for="sample_input_1") Enter username
+ *             input(type="text",name="sample_input_1",placeholder="captain_america")
+ *           div.form--field
+ *             label(for="sample_input_2") Enter password
+ *             input(type="password",name="sample_input_2",placeholder="<PASSWORD>")
+ *           div.form--field
+ *             div.form--field--toggle-input
+ *               input(type="checkbox", id="remember_1")
+ *               label(for="remember_1") Remember me
+ *           div.form--field
+ *             label Text box and button group
+ *             div.form--input-group
+ *               input(type="email", placeholder="Enter email")
+ *               a.button subscribe
+ *           div.form--field
+ *             label Button group
+ *             div.form--input-group
+ *               a.button Tom
+ *               a.button Dick
+ *               a.button Harry
+ *           div.form--field
+ *             label Mixed input group
+ *             div.form--input-group
+ *               i.icon__fa.icon--send
+ *               input(type="email", placeholder="Enter email")
+ *               a.button send
+ *         div.span-l6
+ *           div.form--field
+ *             label(for="country") Country
+ *             div.form--field--select-wrap
+ *               select(name="country")
+ *                 option India
+ *                 option USA
+ *                 option UK
+ *                 option Other
+ *           div.form--field
+ *             label(for="bio") Enter bio here
+ *             textarea(placeholder="Enter bio", name="bio")
+ *       div.row
+ *         div.form--footer
+ *           div.form--footer__segment
+ *             a.button Submit
+ *             a.button Reset
+ *           div.form--footer__segment.form--footer__segment__right
+ *             a.button.button__icon
+ *               i.icon__fa.icon--bookmark
+ *
+ */
+.form {
+  padding: 0;
+  font-size: 16px;
+
+  //form field contains labeled inputs
+  &--field {
+
+    padding: 0 .5em 1em .5em;
+
+    //usage outside form
+    &__isolated {
+      padding: 0;
+    }
+
+    //static contents like headers
+    &__static {
+      padding: 0;
+      h1,h2,h3,h4,h5,h6 {
+        margin: .5em 0;
+      }
+    }
+
+    // all labels inside from--field
+    label {
+      display: block;
+      padding: .25em 0;
+    }
+
+    // common styles for all input
+    @include all-inputs {
+      outline: none;
+      font-family: $form--input-font-family;
+      font-size:inherit;
+      font-style: normal;
+
+      background-color: white;
+
+      border-style: solid;
+      border-width: 1px;
+
+      @include placeholder {
+        color:#999;
+        font-style: italic;
+      };
+
+      &:disabled {
+        @include placeholder {
+          color:#BBB;
+        };
+      }
+    }
+
+  } //end of .form--field
+
+  // form footer
+  &--footer {
+    display: table;
+    width: 100%;
+
+    // form footer buttons container etc..
+    &__segment {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 1em .5em;
+
+      .button,.button__ghost {
+        &:first-child {
+          margin-left: 0 !important;
+        }
+      }
+
+      &__right {
+        text-align: right;
+        .button,.button__ghost {
+          &:first-child {
+            margin-left: 0 !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+/**
+  Select box styles
+*/
+.form--field {
+  //select box wrapper
+  &--select-wrap {
+    display: block;
+    //select box arrow icon
+    &:after {
+      content: '';
+      position: absolute;
+      top:0;
+      right:0;
+      width:2em;
+      height: 100%;
+      background-color: rgba(black, .05);
+
+      background-image: url($data-uri--down-icon);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 20px;
+      pointer-events: none;
+    }
+  }
+
+  //specialised styles for select box
+  select {
+    display: block;
+    outline: none;
+    width: 100%;
+    padding: .5em;
+    appearance:none;
+    transition: all .3s;
+
+    border-radius: $form--input-border-radius;
+    border-color: $form--input-default-border-color;
+
+    &:focus {
+      border-color: $form--input-primary-accent;
+      box-shadow:0 0 20px rgba($form--input-primary-accent, .3);
+    }
+  }
+}
+
+
+
+/**
+  Edit text box styles
+ */
+ .form--field {
+   @mixin state-styles {
+     border-color: $form--input-default-border-color;
+     border-radius: $form--input-border-radius;
+
+     &:focus {
+       border-color: $form--input-primary-accent;
+       box-shadow: 0 0 20px rgba($form--input-primary-accent, .3);
+     }
+   }
+
+   // edit input styles
+   @include edit-controls {
+     display: block;
+     width: 100%;
+     padding: .5em;
+     transition: all .3s;
+     @include state-styles;
+   }
+
+   //specialized styles for text area
+   textarea {
+     display: block;
+     width: 100%;
+     padding: .5em;
+     transition: all .3s;
+     @include state-styles;
+   }
+ }
+ .form__light {
+   .form--field {
+     /* Common style definitions */
+     @mixin light-style {
+       border-color:rgba(white, .4);
+       background-color: rgba(white, 0);
+       color:white;
+
+       &:focus {
+         border-color:rgba(white, .8);
+         box-shadow: 0 0 20px rgba(white, .2);
+         background-color: rgba(white, .1);
+       }
+     }
+
+     @include edit-controls {
+       @include light-style;
+     }
+     textarea {
+       @include light-style;
+     }
+   }
+ }
+
+
+
+
+
+
+/**
+  Custom checkbox styles
+*/
+.form--field {
+  //.form--field--toggle-input is the custom check box implementation using pure css
+  &--toggle-input {
+    display: inline-block;
+    margin-right: 1em;
+
+    input[type=checkbox] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    label {
+      display: inline-block;
+      cursor: pointer;
+      &:before {
+        content: '';
+        display: inline-block;
+        vertical-align: middle;
+        width:1.5em;
+        height: 1.5em;
+        margin-right: .5em;
+        background-color: transparent;
+        transition: all .3s;
+
+        border-radius: 2px;
+        border-width: 2px;
+        border-style: solid;
+        border-color:$form--input-default-border-color;
+      }
+    }
+  }
+
+  // custom checkbox style
+  input[type=checkbox] {
+
+    @include form--custom-check-state(checked) {
+      background-color: $form--input-primary-accent;
+      background-image: url('../images/icon-done.png');
+      background-size: cover;
+
+      border-color:$form--input-primary-accent;
+    }
+
+    @include form--custom-check-state(focus) {
+
+    }
+
+    @include form--custom-check-state(disabled) {
+      opacity: .6;
+    }
+
+    @include form--custom-check-state('disabled:checked') {
+
+    }
+  }
+}
+
+
+
+
+// input groups
+.form--input-group {
+  display: inline-table;
+  width: 100%;
+
+  &__no-fluid {
+    width: auto;
+  }
+
+  .dropdown--menu {
+    top:calc(100% + 1px);
+    left:-1px;
+  }
+
+  /* possible childrens */
+  input,
+  button,
+  .button,
+  .button__ghost,
+  .icon-fa {
+    display: table-cell;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    box-shadow: none;
+    vertical-align: middle;
+
+    border-radius: 0;
+    border-width: 1px 0 1px 1px;
+  }
+
+  /* edit controlls */
+  @include edit-controls {
+    border-radius: 0;
+    border-width: 1px 1px 1px 1px;
+    color:inherit;
+    box-shadow: none !important;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    // no effects on edit controls when under input group
+    &:hover,&:active,&:focus {
+      border-color: $form--input-default-border-color;
+    }
+
+    // any icon followed ny an edit group
+    + i.icon__fa,
+    + .button.button__ghost {
+      border-left-width: 0;
+    }
+  }
+
+  /* icon cell */
+  >.icon__fa {
+    display: table-cell;
+    width:2.5em;
+    text-align: center;
+    vertical-align: middle;
+
+    border-width: 1px 0 1px 1px;
+    border-style: solid;
+    border-color:$form--input-default-border-color;
+  }
+
+  // rounded borders
+  >*:first-child {
+    border-top-left-radius: 3px !important;
+    border-bottom-left-radius: 3px !important;
+  }
+
+  >*:last-child {
+    border-right-width: 1px !important;
+    border-top-right-radius: 3px !important;
+    border-bottom-right-radius: 3px !important;
+  }
+
+
+  &__no-inner-border {
+    >*:not(:first-child) {
+      border-left-width: 0 !important;
+    }
+
+    >*:not(:last-child) {
+      border-right-width: 0 !important;
+    }
+  }
+}
+
+.from--field__collapsible label {
+  user-select:none;
+  &:hover {
+    color: get-background-color('peterriver')
+  }
+}
+
+
+
+
+
+
+
+
+
+//

@@ -1,0 +1,40 @@
+/*
+  Notions:
+  1) .item is a single item which can be a child under vertical list or horizontal list
+  2) .item may have icon indicator
+  3) .item may have one or more label right aligned or flow after content
+  4) .item may be wrapped inside anchor
+  5) .item can have arrow icon
+ */
+
+.basic-list {
+
+  &--header {
+    margin: .2em 0;
+    padding: 0;
+    font-weight: bold;
+  }
+
+  ul.basic-list--items {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    >li {
+      line-height: 2em;
+
+      >a {
+        opacity: .7;
+        transition: opacity .3s;
+        &:hover { opacity: 1; }
+      }
+
+      >i[class^=icon], > a > i[class^=icon] {
+        display: table-cell;
+        vertical-align: baseline;
+        width: 1.4em;
+        text-align: center;
+      }
+    }
+  }
+}
