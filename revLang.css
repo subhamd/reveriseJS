@@ -1,0 +1,73 @@
+/*custom font for text*/
+@import url(http://fonts.googleapis.com/css?family=Nunito);
+/*CSS file for fontawesome - an iconfont we will be using. This CSS file imported contains the font-face declaration. More info: http://fortawesome.github.io/Font-Awesome/ */
+@import url(http://thecodeplayer.com/uploads/fonts/fontawesome/css/font-awesome.min.css);
+
+/*Basic reset*/
+* {margin: 0; padding: 0;}
+
+
+#revLang {
+	background: #004050;
+	width: 70px;
+	
+	border-radius: 25px;
+	text-align:center;
+	position:fixed;
+	top:50%;
+	right:1px;
+	
+	color: white;
+	/*Some cool shadow and glow effect*/
+	box-shadow: 
+		0 5px 15px 1px rgba(0, 0, 0, 0.4), 
+		0 0 200px 1px rgba(255, 255, 255, 0.5);
+}
+/*heading styles*/
+#revLang h3 {
+	font-size: 15px;
+	line-height: 60px;
+	border-radius: 25px;
+	cursor: pointer;
+	/*fallback for browsers not supporting gradients*/
+	background: #003040; 
+	background: linear-gradient(#003040, #002535);
+}
+/*heading hover effect*/
+#revLang h3:hover {
+	text-shadow: 0 0 1px rgba(255, 255, 255, 0.8);
+}
+/*iconfont styles*/
+#revLang h3 span {
+	font-size: 30px;
+	position:relative;
+	
+}
+/*list items*/
+#revLang li {
+	list-style-type: none;
+}
+/*links*/
+#revLang ul ul li a {
+	color: white;
+	text-decoration: none;
+	font-size: 11px;
+	line-height: 27px;
+	display: block;
+
+	/*transition for smooth hover animation*/
+	transition: all 0.20s;
+}
+/*hover effect on links*/
+#revLang ul ul li a:hover {
+	background: #003545;
+	border-left: 5px solid lightgreen;
+}
+/*Lets hide the non active LIs by default*/
+#revLang ul ul {
+	display: none;
+}
+#revLang li.active ul {
+	display: block;
+}
+
