@@ -15,13 +15,12 @@ export function nodePos(node) {
 // this recursive function calculates the unique node id
 function rec(node) {
   if(node.nodeName === 'HTML') return 'HTML'
-
   // get the siblings
-  let siblings = node.parentNode.childNodes
+  let siblings = (node.parentNode || node.ownerElement).childNodes
   let i = 0
   // get the index of the current node among the siblings
   if(siblings.length == 1) {
-    return `${node.nodeName}:0 ` + rec(node.parentNode)
+    return `${node.nodeName}:0 ` + rec(node.parentNode || node.ownerElement)
   }
 
   let node_index = 0
@@ -32,5 +31,17 @@ function rec(node) {
     }
   }
 
-  return `${node.nodeName}:${node_index} ` + rec(node.parentNode)
+  return `${node.nodeName}:${node_index} ` + rec(node.parentNode || node.ownerElement)
+}
+
+// returns a source key for dictionary when provided nodeId and text
+export function sourceKey(nodeId, text) {
+  return `${nodeId}#${text}`
+}
+
+// returns a source key for dictionary when provided DOM node
+export function sourceKeyFromNode(node) {
+  let _nodeId = nodeId(node),
+      text = node.textContent
+  return `${nodeId}#${text}`
 }

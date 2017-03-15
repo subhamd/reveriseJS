@@ -23,9 +23,16 @@ function DOM_walker(cb) {
     cb && cb(node)
   }
 
-  // document.querySelectorAll('[placeholder], [title]').forEach(element => {
-  //   console.dir(element)
-  // })
+  document.querySelectorAll('[placeholder], [title]').forEach(element => {
+    let attrs = element.attributes
+    let acceptedAttrs = ['placeholder', 'title']
+
+    for(let i = 0; i < attrs.length; i++) {
+      if(acceptedAttrs.indexOf(attrs[i].nodeName.toLowerCase()) != -1) {
+        cb && cb(attrs[i])
+      }
+    }
+  })
 }
 
 export default DOM_walker;
