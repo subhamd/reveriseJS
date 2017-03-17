@@ -27,4 +27,21 @@ function fetch(stringArray, target_lang, cb) {
   })
 }
 
+export function submit(string_data, cb) {
+	let req_data = JSON.stringify(string_data),
+  xhr = new XMLHttpRequest();
+
+  xhr.open("POST", `http://localhost:8002/submit`);
+  xhr.setRequestHeader("rev-api-key", "FE7JP7xAYGR8lB5XIFBEDYLxzbkWvyL8fD1E");
+  xhr.setRequestHeader("rev-app-id", "com.nilout");
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.send(req_data);
+
+  xhr.addEventListener("readystatechange", function () {
+    if (this.readyState === 4) {
+      cb && cb(JSON.parse(this.responseText))
+    }
+  })
+}
+
 export default fetch;

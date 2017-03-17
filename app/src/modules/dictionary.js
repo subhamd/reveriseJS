@@ -1,61 +1,90 @@
+import objectAssign from 'object-assign'
+import normalizeUrl from 'normalize-url'
+import md5 from 'spark-md5'
 import walker from './walker'
-import fetch from './fetch'
+import fetch, {submit} from './fetch'
 import nodeId, { nodePos, sourceKey, sourceKeyFromNode } from './nodeId'
 
-let dictionary = {},
-    nodeMap = {}
+let _dictionary   = {},
+    _settings = null,
+    dictLangKeys  = ['hindi', 'gujarati', 'bengali']
+
+
+// returns unique dictionary key
+function dictKey() {
+  let data = normalizeUrl(location.href.trim())
+  return md5.hash(data)
+}
+
+// load dictionary
+function syncWithStorage(cb) {
+  let dict_key = dictKey(),
+      stored_data = localStorage.getItem(dict_key),
+      settings = localStorage.getItem('__settings__')
+
+  if(!settings) {
+    settings = {
+      currentLang: 'english'
+    }
+    localStorage.setItem('__settings__', settings)
+    _settings = settings
+  }
+
+  // no stored data
+  if(!stored_data) {
+    // request payload
+    let req_body = {
+      dict_key: dict_key,
+      data: {}
+    }
+
+    // walk the DOM
+    walker(node => {
+      let _nodeId = nodeId(node)
+      req_body.data[_nodeId] = {
+        id: _nodeId,
+        value: node.textContent,
+        url: location.href,
+        nodePos: nodePos(node)
+      }
+    })
+
+    // submit data to server
+    submit(req_body, response => {
+      // update localStorage
+      //localStorage.setItem(dict_key, JSON.stringify(response))
+      // trigger callback
+      cb(response)
+    })
+  }
+  // got stored data
+  else {
+    let _storedDict = JSON.parse(stored_data)
+
+    // store the node references in the dictionary
+    walker(node => {
+      let _nodeId = nodeId(node)
+      if(_storedDict[_nodeId]) _storedDict[_nodeId].ref = node
+    })
+
+    // trigger callback
+    cb && cb(_storedDict)
+  }
+}
 
 export default function factory() {
 
-  // add functions for loading from localStorage
-
-
+  // return -> class instance
   return {
-    // walks the DOM and creates a nodemap
+
     init: () => {
 
-      if(dictionary['__meta__']) return false
-
-      // put timestamp etc in the meta entry
-      dictionary['__meta__'] = {
-        is_initialized: true
-      }
-
-      // initialize nodemap and dictionary data
-      // note: the nodemap may need to be updated from time to time if the page is dynamic
-      walker(function(node) {
-        let _nodeId = nodeId(node),
-            text = node.textContent.trim()
-
-        // first store the original node map with english text
-        nodeMap[_nodeId] = {
-          id: _nodeId,
-          ref: node,
-          content: text
-        }
-
-        // initial dictionary data
-        dictionary[sourceKey(_nodeId, text)] = {
-          english: text
-        }
+      // after sync save a ref
+      syncWithStorage(dictionary => {
+        _dictionary = dictionary
+        console.log(_dictionary)
       })
 
-    },
-
-    // return the current nodemap
-    getNodeMap: () => {
-      return nodeMap
-    },
-
-    // given node_id and target_lang returns the translated string
-    getTranslation: (node_id, target_lang) => {
-      let entry = dictionary[sourceKey(node_id, nodeMap[node_id].content)]
-      if(entry && entry[target_lang]) {
-        return entry[target_lang]
-      } else {
-        return false
-      }
-      return false
     },
 
     // the dictionary becomes aware of this node
@@ -63,51 +92,11 @@ export default function factory() {
       let _nodeId = nodeId(node),
           text = node.textContent
 
-      nodeMap[_nodeId] = {
-        id: _nodeId,
-        ref: node,
-        content: text
-      }
-
       // initial dictionary entry for this node
-      dictionary[sourceKey(_nodeId, text)] = {
-        english: text
+      _dictionary[nodeId(node)] = {
+        english: text,
+        //other languages are to be added
       }
-
-    },
-
-    // update dictionary for a node id, will not update any un added nodes
-    update: ( target_lang, cb = null ) => {
-      // get all the source texts
-      let source_strings = []
-      let node_ids = []
-
-      for(let id in nodeMap) {
-        source_strings.push(nodeMap[id].content)
-        node_ids.push(id)
-      }
-
-      // get the translated data from server
-      fetch(source_strings, target_lang, function(response) {
-        // update dictionary with new response
-        node_ids.forEach(function(id, index) {
-
-          let src_key = sourceKey(id, nodeMap[id].content)
-
-          // check and update dictionary with new language output/target string
-          if(dictionary[src_key]) {
-            dictionary[src_key][target_lang] = response[index].out
-          }
-          else {
-            dictionary[src_key] = {}
-            dictionary[src_key][target_lang] = response[index].out
-          }
-        })
-
-        console.log(dictionary)
-        cb && cb(true)
-      })
-
     }
 
   }

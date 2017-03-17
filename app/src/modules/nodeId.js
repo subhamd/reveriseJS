@@ -3,7 +3,7 @@ import md5 from 'spark-md5'
  Calculates a unique node is based on the position of the node in the DOM
 */
 export default function(node) {
-  return md5.hash(rec(node))
+  return md5.hash((rec(node).trim() + '#' + node.textContent.trim()).trim())
 }
 
 // returns the node position in special format
@@ -36,12 +36,12 @@ function rec(node) {
 
 // returns a source key for dictionary when provided nodeId and text
 export function sourceKey(nodeId, text) {
-  return `${nodeId}#${text}`
+  return md5((`${nodeId}#${text}`).trim())
 }
 
 // returns a source key for dictionary when provided DOM node
 export function sourceKeyFromNode(node) {
   let _nodeId = nodeId(node),
       text = node.textContent
-  return `${nodeId}#${text}`
+  return (`${nodeId}#${text}`).trim()
 }
