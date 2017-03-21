@@ -1,132 +1,155 @@
 import dbc from '../db'
 import Promise from 'bluebird'
 import objectAssign from 'object-assign'
+import translation from '../translationService'
+import { objForEach, now } from '../utils'
+
 
 export default function strManagerFactory() {
-  let _langs = ['hindi', 'bengali', 'assamese', 'gujarati', 'kannada', 'marathi', 'malayalam', 'odia', 'telugu', 'tamil', 'punjabi']
+  let _langs = ['hindi', 'bengali', 'assamese', 'gujarati', 'kannada', 'marathi', 'malayalam', 'odia', 'telugu', 'tamil', 'punjabi'],
+      _availableLang = ['hindi', 'kannada', 'punjabi']
+
+
+  // apply translation to a document
+  function applyTranslation(doc, appid, dict_key, data) {
+    let source_strings = [],
+        translate_promises = [],
+        db_dictionary_entries = doc.apps[appid].dictionary[dict_key].entries
+
+    if(db_dictionary_entries === data) { // new dictionary
+      objForEach(db_dictionary_entries, (entry, key) => {
+        source_strings.push({ id: entry.id, value: entry.value })
+      })
+    } else {  // existing dictionary
+      objForEach(data, (entry, key) => {
+        // only add new nodeids
+        if(!db_dictionary_entries[key]) {
+          db_dictionary_entries[key] = entry
+        }
+      })
+      objForEach(db_dictionary_entries, (entry, key) => {
+        if(entry.status === 'notprocessed') {
+          source_strings.push({ id: entry.id, value: entry.value })
+        }
+      })
+    }
+
+    // _availableLang is the order of promise seriese
+    if(source_strings.length) {
+      _availableLang.forEach(lang => {
+        translate_promises.push(translation(source_strings, lang))
+      })
+
+      return Promise.all(translate_promises)
+      .then(responses => { //array of array of strings
+        doc.apps[appid].dictionary[dict_key]['__meta__'].lastUpdated = now()
+        _availableLang.forEach((lang, index) => [
+          responses[index].forEach((response) => {
+            db_dictionary_entries[response.id][lang] = response.value
+            db_dictionary_entries[response.id].lastUpdated = now()
+            db_dictionary_entries[response.id].status = 'processed' //we just processed this node
+          })
+        ])
+        return doc
+      })
+    }
+
+    return Promise.resolve(doc)
+  }
 
   return {
-
     // sync with client
     syncDictionary: (apikey, appid, req_body) => {
-      let _dict_id = req_body.dict_key,
-          _dict_data = req_body.data,
-          __appid //escaped appid to be used as app key
+      let dict_key = req_body.dict_key,
+          new_dict_data = req_body.data,
+          __appid = appid.replace('.', '~') //escaped appid to be used as app key
 
 
-      // transform inbound data
-      function transformDataIn(dict_key, dict_data) {
-        for(let id in dict_data) {
-          // if there is no status key then we know that is a first call so make their status pending
-          dict_data[id].status  = 'pending'
-          _langs.forEach(lang => {
-            dict_data[id][lang] = dict_data[id].value
-          })
+      let collection = null
 
-          dict_data[id].history = []
+      return dbc.connect()
+      .then(db => {
+        console.log('Connecting to db...')
+        collection = db.collection(apikey)
+        return collection.findOne()
+      })
+      .then(doc => {
+        // verify app id here
+        return Promise.resolve(doc)
+      })
+      .then(doc => {
+        console.log('Modifying the doc...')
+        // if no document found then it is an error
+        if( !doc ) {
+          reject("No document found in this collection.")
+          return
         }
-        return dict_data
-      }
 
+        // augment incomming data
+        objForEach(new_dict_data, (item) => {
+          item.status = 'notprocessed'
+          item.history = []
+          _langs.forEach(lang => item[lang] = item.value)
+        })
 
-      // transform outbound data
-      function transformDataOut(dict_key, dict_data) {
-        return dict_data
-      }
-
-
-      // the incomming dictionary entries does not have any status info and any other
-      // data necessary for backend processing, here we add the default values for those
-      // example info -> 'status' and timeline for dictionary entries
-      function updateDictionary(app, dict_key, dict_data) {
-        transformDataIn(dict_key, dict_data)
-        if(!app.dictionary) app.dictionary = {}
-        if(!app.dictionary[dict_key]) app.dictionary[dict_key] = dict_data
-        else {
-          // update the dictionary by extending existing dictionary
-          app.dictionary[dict_key] = objectAssign(dict_data, app.dictionary[dict_key])
+        // create an app if not already created
+        if(!doc.apps[__appid]) {
+          // default entry
+          doc.apps[__appid] = {
+            appid,
+            dictionary: {}
+          }
+          doc.apps[__appid].dictionary[dict_key] = { __meta__: {}, entries: new_dict_data }
+          doc.apps[__appid].dictionary[dict_key]['__meta__'].lastUpdated = now()
         }
-      }
-
-      // return promise
-      return new Promise((resolve, reject) => {
-        dbc.connect().then(db => {
-
-          // store the collection reference
-          let collection = db.collection(apikey)
-
-          // get the users doc
-          collection.findOne().then(doc => {
-
-            // if no document found then it is an error
-            if( !doc ) {
-              reject("No document found in this collection.")
-              return
-            }
-
-            __appid = appid.replace('.', '~')
-            // if there are no apps then create a new one
-            // may be verify appid with revup later
-            if(!doc.apps) doc.apps = {}
-            if(!doc.apps[__appid]) {
-
-              doc.apps[__appid] = { appid, dictionary: {}}
-              doc.apps[__appid].dictionary[_dict_id] = _dict_data
-            }
-
-            // find the required app from apps collection
-            if(doc.apps[__appid]) {
-              // update/sync the dictionary
-              updateDictionary(doc.apps[__appid], _dict_id, _dict_data)
-
-              let _update = {}
-              _update[`apps.${__appid}`] = doc.apps[__appid]
-
-              // update collection
-              collection.update( { apps: { $exists: true } }, { $set: _update })
-              .then(result => {
-                resolve(result)
-              })
-              .catch(err => reject(err))
-            }
-            else {
-              reject(`No app found with the given appid -> ${appid}`)
-            }
-
-
-          }).catch(err => reject(err))
-        }).catch(err => reject(err))
+        return doc
+      })
+      .then(doc => { // then translate document
+        console.log('Translating the doc...')
+        return applyTranslation(doc, __appid, dict_key, new_dict_data)
+      })
+      .then(doc => { // then update db
+        console.log('Updating the database..')
+        let _update = {}
+        _update[`apps.${__appid}`] = doc.apps[__appid]
+        return collection.update( { apps: { $exists: true } }, { $set: _update })
       })
     },
 
     // will return a dictionary for a specific url
     getStringData: (apikey, appid, dictionary_id) => {
-      return new Promise((resolve, reject) => {
-      dbc.connect().then(db => {
-        let collection = db.collection(apikey),
-        __appid = appid.replace('.', '~'),
-        _query = {},
+      let __appid = appid.replace('.', '~')
+
+      // connect
+      return dbc.connect()
+      .then(db => {
+        let collection = db.collection(apikey)
+        return collection
+      })
+      // query collection
+      .then(collection => {
+        let _query = {},
         _filter = {}
         _filter[`apps.${__appid}.dictionary.${dictionary_id}`] = 1
-
         _query[`apps.${__appid}.dictionary.${dictionary_id}`] = { $exists: true }
-
-          collection.findOne(_query, _filter).then(doc => {
-            let data = doc.apps[__appid]['dictionary'][dictionary_id],
-                published = {}
-
-            // delete history from result
-            for(let id in data) {
-              if(data[id].status === 'published') {
-                delete data[id].history
-                published[id] = data[id]
-              }
-            }
-            // resolve with only published data
-            resolve(published)
-          }).catch(err => reject(err))
-
-        })
+        return collection.findOne(_query, _filter)
+      })
+      // modify result and return
+      .then(doc => {
+        let data = doc.apps[__appid]['dictionary'][dictionary_id],
+            published = {}
+        // delete history from result
+        for(let id in data.entries) {
+          // only select published strings
+          if(data.entries[id].status === 'published') {
+            delete data.entries[id].history
+            published[id] = data.entries[id]
+          }
+        }
+        return {
+          published,
+          updatedOn: data.__meta__.lastUpdated
+        }
       })
     }
   }

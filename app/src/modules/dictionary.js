@@ -2,8 +2,9 @@ import objectAssign from 'object-assign'
 import normalizeUrl from 'normalize-url'
 import md5 from 'spark-md5'
 import walker from './walker'
-import fetch, {submit} from './fetch'
+import fetch, { submit, checkUpdate} from './fetch'
 import nodeId, { nodePos, sourceKey, sourceKeyFromNode } from './nodeId'
+import getOrSet, { storageInit, getObject, setObject } from './storageMan'
 
 let _dictionary   = {},
     _settings = null,
@@ -11,27 +12,18 @@ let _dictionary   = {},
 
 
 // returns unique dictionary key
-function dictKey() {
-  let data = normalizeUrl(location.href.trim())
-  return md5.hash(data)
+export function dictKey() {
+  let url = window.location.protocol + "//" + window.location.host + window.location.pathname
+  return md5.hash(normalizeUrl(url.trim()))
 }
 
 // load dictionary
 function syncWithStorage(cb) {
   let dict_key = dictKey(),
-      stored_data = localStorage.getItem(dict_key),
-      settings = localStorage.getItem('__settings__')
-
-  if(!settings) {
-    settings = {
-      currentLang: 'english'
-    }
-    localStorage.setItem('__settings__', settings)
-    _settings = settings
-  }
+      stored_data = getObject(dict_key)
 
   // no stored data
-  if(!stored_data) {
+  if(stored_data == false || stored_data == undefined) {
     // request payload
     let req_body = {
       dict_key: dict_key,
@@ -51,24 +43,39 @@ function syncWithStorage(cb) {
 
     // submit data to server
     submit(req_body, response => {
-      // update localStorage
-      //localStorage.setItem(dict_key, JSON.stringify(response))
-      // trigger callback
-      cb(response)
+      let store_data = {}
+      store_data.timestamp = response.dictionary.updatedOn
+      store_data.entries = response.dictionary.published
+      cb && cb(store_data, true)
     })
   }
   // got stored data
   else {
-    let _storedDict = JSON.parse(stored_data)
+    checkUpdate(dict_key, stored_data[dict_key].timestamp, (update_info) => {
+      console.log("Update info from server:")
+      console.log(update_info)
 
-    // store the node references in the dictionary
-    walker(node => {
-      let _nodeId = nodeId(node)
-      if(_storedDict[_nodeId]) _storedDict[_nodeId].ref = node
+      let _storedDict = stored_data.entries,
+          new_data = {}
+          
+      // update stored data
+      new_data.timestamp = update_info.updateNeeded ? (new Date()).getTime() : stored_data.timestamp
+      new_data.entries = update_info.updateNeeded ? update_info.published : stored_data.entries
+
+      if(_storedDict) {
+        // store the node references in the dictionary
+        walker(node => {
+          let _nodeId = nodeId(node)
+          if(_storedDict[_nodeId]) _storedDict[_nodeId].ref = node
+        })
+
+        // trigger callback
+        cb && cb(new_data, update_info.updateNeeded)
+      }
+      else {
+        cb & cb(new_data, update_info.updateNeeded)
+      }
     })
-
-    // trigger callback
-    cb && cb(_storedDict)
   }
 }
 
@@ -78,13 +85,44 @@ export default function factory() {
   return {
 
     init: () => {
+      storageInit()
+      let settings = getObject('__settings__')
 
       // after sync save a ref
-      syncWithStorage(dictionary => {
+      syncWithStorage((dictionary, updateNeeded) => {
         _dictionary = dictionary
-        console.log(_dictionary)
+
+        if(updateNeeded) console.log("Update detected at the backend")
+        if(!updateNeeded) console.log("Using from local cache")
+
+        // set the dictionary for this page
+        updateNeeded && setObject(dictKey(), _dictionary)
+
+        // if dictionary is not empty
+        if(_dictionary.entries) {
+          // add node refs to the inmemory dictionary
+          walker(node => {
+            let _nodeId = nodeId(node)
+            if(_dictionary.entries[_nodeId]) {
+              _dictionary.entries[_nodeId].ref = node
+            }
+          })
+
+          // translate page
+          let currentLang = settings.currentLang
+          for(let nodeId in _dictionary.entries) {
+            let nodeData = _dictionary.entries[nodeId]
+            let ref = nodeData.ref
+            let translated = nodeData[currentLang]
+            ref.textContent = translated
+          }
+        }
       })
 
+    },
+
+    getCurrent: () => {
+      return _dictionary.entries
     },
 
     // the dictionary becomes aware of this node

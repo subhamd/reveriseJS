@@ -17,19 +17,14 @@ export default function accountFactory() {
             .then((docs) => {
               // if there is no doc then create new
               if(!docs) {
-                collection.insertOne({
-                  info: { apikey, appid },
-                  apps: {}
-                })
+                collection.insertOne({ info: { apikey }, apps: {} })
                 .then(result => resolve(result))
               } else {
                 // already created
                 resolve(true)
               }
-
             })
             .catch(err => reject(err))
-
           })
           .catch((err) => reject(err))
         })

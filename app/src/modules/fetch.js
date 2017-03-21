@@ -27,6 +27,23 @@ function fetch(stringArray, target_lang, cb) {
   })
 }
 
+export function checkUpdate(dict_key, timestamp, cb) {
+	let req_data = JSON.stringify({ dict_key, timestamp }),
+	xhr = new XMLHttpRequest();
+
+  xhr.open("post", `http://localhost:8002/update-check`);
+  xhr.setRequestHeader("rev-api-key", "FE7JP7xAYGR8lB5XIFBEDYLxzbkWvyL8fD1E");
+  xhr.setRequestHeader("rev-app-id", "com.nilout");
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.send(req_data);
+
+  xhr.addEventListener("readystatechange", function () {
+    if (this.readyState === 4) {
+      cb && cb(JSON.parse(this.responseText))
+    }
+  })
+}
+
 export function submit(string_data, cb) {
 	let req_data = JSON.stringify(string_data),
   xhr = new XMLHttpRequest();
