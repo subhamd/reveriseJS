@@ -6,8 +6,8 @@
   "scripts": {
     "build": "babel-node tools/build.js",
     "serve": "babel-node tools/server.js",
-    "devserver": "nodemon server/server.js --exec babel-node --inspect --presets es2015,stage-1",
-    "server": "babel-node server/server.js --presets es2015,stage-1"
+    "devbackend": "nodemon server/server.js --exec babel-node --inspect --presets es2015,stage-1",
+    "backend": "babel-node server/server.js --presets es2015,stage-1"
   },
   "author": "Smit Dey",
   "license": "ISC",

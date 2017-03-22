@@ -1,4 +1,16 @@
 import md5 from 'spark-md5'
+import normalizeUrl from 'normalize-url'
+
+export function normalizedLocation() {
+  let loc_url = window.location.protocol + '//' + window.location.host + window.location.pathname
+  return normalizeUrl(loc_url.trim())
+}
+
+// returns unique dictionary key
+export function dictKey() {
+  return md5.hash(normalizedLocation())
+}
+
 /*
  Calculates a unique node is based on the position of the node in the DOM
 */
@@ -32,16 +44,4 @@ function rec(node) {
   }
 
   return `${node.nodeName}:${node_index} ` + rec(node.parentNode || node.ownerElement)
-}
-
-// returns a source key for dictionary when provided nodeId and text
-export function sourceKey(nodeId, text) {
-  return md5((`${nodeId}#${text}`).trim())
-}
-
-// returns a source key for dictionary when provided DOM node
-export function sourceKeyFromNode(node) {
-  let _nodeId = nodeId(node),
-      text = node.textContent
-  return (`${nodeId}#${text}`).trim()
 }

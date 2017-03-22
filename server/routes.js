@@ -7,39 +7,40 @@ import { objForEach } from './utils'
 
 export default function makeRoutes(app) {
 
+  // configure express app
   app.use(cors())
   app.use(bodyParser.json({limit: '50mb'}))
 
-  let account = accountFactory(),
-      strManager = strManagerFactory()
+  let account     = accountFactory(),
+      strManager  = strManagerFactory()
 
   // get routes
   app.get('/', (req, res) => {
     res.end('JS Localizer backend!')
   })
 
-  // return approved dictionary
-  app.get('/fetch', (req, res) => {
 
-  })
-
-  // post routes
-
-
-  // accepts strings returns dictionary
+  // accepts strings returns dictionary if newer
   app.post('/update-check', (req, res) => {
     // check for update and if available send back the new data
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~')
-
     let { dict_key, timestamp } = req.body
+
     dbc.connect().then(db => {
       return db.collection(apikey).findOne()
     })
     .then(doc => {
+      // doc doesnt exists
+      if(!doc) {
+        res.json({ updateNeeded: false, msg: "No update needed" })
+        return
+      }
+
       let last_updated = doc.apps[__appid].dictionary[dict_key].__meta__.lastUpdated
-      if(last_updated > timestamp) {
+
+      if( last_updated > timestamp ) {
         let dict = doc.apps[__appid].dictionary[dict_key],
             updatedOn = dict.__meta__.lastUpdated,
             published = {}
@@ -50,17 +51,19 @@ export default function makeRoutes(app) {
             published[key] = entry
           }
         })
-
         res.json({ updateNeeded: true, msg: "Update needed", published })
       }
       else {
         res.json({ updateNeeded: false, msg: "Update not needed"})
       }
     })
-    .catch(err => console.log(err))
-
+    .catch(err => {
+      console.log(err)
+      res.json({ error: true, message: 'Something went wrong at the backend.' })
+    })
   })
 
+  // submit strings
   app.post('/submit', (req, res) => {
     // get the apikey
     let apikey = req.headers['rev-api-key']
@@ -72,7 +75,7 @@ export default function makeRoutes(app) {
       return strManager.syncDictionary(apikey, appid, req.body)
     })
     .then(() => {
-      return strManager.getStringData(apikey, appid, req.body.dict_key)
+      return strManager.getPublishedData(apikey, appid, req.body.dict_key)
     })
     .then(clientDictionary => {
       res.json({
@@ -87,10 +90,45 @@ export default function makeRoutes(app) {
     })
   })
 
+  app.post('/strings', (req, res) => {
+    let apikey = req.headers['rev-api-key'],
+        appid = req.headers['rev-app-id'],
+        __appid = appid.replace('.', '~'),
+        { dict_key, status } = req.body
 
-  // put routes
-  app.put('/string', (req, res) => {
+    console.log(req.body)
 
+    strManager.getStrings(apikey, __appid, dict_key, status)
+    .then(data => {
+      res.json(data)
+    })
+    .catch(err => {
+      console.log(err)
+      res.json({ error: err })
+    })
   })
 
+  app.post('/update', (req, res) => {
+    let apikey = req.headers['rev-api-key'],
+        appid = req.headers['rev-app-id'],
+        __appid = appid.replace('.', '~'),
+        { dict_key, node_key } = req.body
+    strManager.updateEntry(apikey, __appid, dict_key, node_key)
+    .then(data => res.json(data))
+  })
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+//

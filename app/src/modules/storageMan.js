@@ -1,5 +1,6 @@
 import objectAssign from 'object-assign'
 
+// update local storage with default values
 export function storageInit() {
   let settings = localStorage.getItem('__settings__')
   if(!settings) {
@@ -13,33 +14,10 @@ export function getObject(key) {
 }
 
 export function setObject(key, obj) {
-  let current_val = getObject(key) || {}
-  current_val[key] = obj
-  localStorage.setItem(key, JSON.stringify(current_val))
+  localStorage.setItem(key, JSON.stringify(obj))
+  return obj
 }
 
 export function removeObject(key) {
   localStorage.removeItem(key)
-}
-
-export default function getOrSet(key, value, set) {
-  let stored_data = localStorage.getItem(key)
-
-  if(stored_data && !set) {
-    return JSON.parse(stored_data)
-  }
-
-  if(stored_data && set) {
-    stored_data = objectAssign(value)
-    localStorage.setItem(key, JSON.stringify(stored_data))
-    return stored_data
-  }
-
-  if(set) {
-    localStorage.setItem(key, JSON.stringify(value))
-    return value
-  }
-  else {
-    return value
-  }
 }
