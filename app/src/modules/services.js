@@ -39,7 +39,7 @@ function factory(config) {
 
     // check for update in a dictionary
     checkUpdate(dict_key, local_timestamp) {
-      return post(`${base_url}update-check`, { dict_key,  timestamp: local_timestamp}, headers)
+      return post(`${base_url}update-check`, { dict_key,  timestamp: local_timestamp }, headers)
     }
 
   }

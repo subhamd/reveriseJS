@@ -50,7 +50,7 @@ function factory () {
           })
         }
         else {
-          service.checkUpdate().then(response => {
+          service.checkUpdate(dict_key, cached.lastUpdated).then(response => {
 
             if(response.update_status === 'UPDATE_AVAILABLE') {
               updateStorage(response)
