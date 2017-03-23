@@ -14,7 +14,9 @@ export function getObject(key) {
 }
 
 export function setObject(key, obj) {
-  localStorage.setItem(key, JSON.stringify(obj))
+  if(typeof obj != 'string')
+    localStorage.setItem(key, JSON.stringify(obj))
+  else localStorage.setItem(key, obj)
   return obj
 }
 

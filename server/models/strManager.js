@@ -46,7 +46,7 @@ export default function strManagerFactory() {
 
       return Promise.all(translate_promises)
       .then(responses => { //array of array of strings
-        
+
         _m(doc, [`apps^${appid}^dictionary^${dict_key}^__meta__^lastUpdated`], [ now() ])
 
         _availableLang.forEach((lang, index) => [
@@ -203,12 +203,32 @@ export default function strManagerFactory() {
       })
     },
 
-
-    updateEntry: (apikey, appid, dict_key, node_key) => {
+    // update a single node
+    updateEntry: (apikey, appid, dict_key, node_key, new_value) => {
       return dbc.connect()
       .then(db => {
-        return db.collection(apikey)
-          .findOne({}, _m({}, [`apps.${appid}.dictionary.${dict_key}.entries`], [ true ]))
+
+        let _paths = [],
+            _values = []
+
+        // dont forget to validate new data before proceeding
+
+        objForEach(new_value, (val, key) => {
+          _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.${key}`)
+          _values.push(val)
+        })
+
+        // additionally update the timestamp
+        _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.lastUpdated`)
+        _values.push(now())
+
+        // save snapshot in history
+        _paths.push(`$push^apps.${appid}.dictionary.${dict_key}.entries.$.history`)
+        _values.push({ updatedOn: now(), new_value })
+
+        return db.collection(apikey).update(
+          _m({}, [`apps.${appid}.dictionary.${dict_key}.entries.id`], [ node_key ]),
+          _m({}, _paths, _values))
       })
     }
   }

@@ -34,7 +34,7 @@ export default function makeRoutes(app) {
     .then(doc => {
       // doc doesnt exists
       if(!doc) {
-        res.json({ updateNeeded: false, msg: "No update needed" })
+        res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
         return
       }
 
@@ -51,10 +51,10 @@ export default function makeRoutes(app) {
             published[key] = entry
           }
         })
-        res.json({ updateNeeded: true, msg: "Update needed", published })
+        res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed", published })
       }
       else {
-        res.json({ updateNeeded: false, msg: "Update not needed"})
+        res.json({ update_status: 'UPDATE_UNAVAILABLE', updateNeeded: false, msg: "Update not needed", published: {} })
       }
     })
     .catch(err => {
@@ -81,7 +81,7 @@ export default function makeRoutes(app) {
       res.json({
         success: true,
         msg: 'Successfully received strings.',
-        dictionary: clientDictionary
+        ...clientDictionary
       })
     })
     .catch(err => {
@@ -90,7 +90,7 @@ export default function makeRoutes(app) {
     })
   })
 
-  app.post('/strings', (req, res) => {
+  app.post('/fetch', (req, res) => {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~'),
@@ -108,16 +108,14 @@ export default function makeRoutes(app) {
     })
   })
 
-  app.post('/update', (req, res) => {
+  app.post('/update-entry', (req, res) => {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~'),
-        { dict_key, node_key } = req.body
-    strManager.updateEntry(apikey, __appid, dict_key, node_key)
+        { dict_key, node_key, node_data } = req.body
+    strManager.updateEntry(apikey, __appid, dict_key, node_key, node_data)
     .then(data => res.json(data))
   })
-
-
 
 }
 

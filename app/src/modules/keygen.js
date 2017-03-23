@@ -14,7 +14,7 @@ export function dictKey() {
 /*
  Calculates a unique node is based on the position of the node in the DOM
 */
-export default function(node) {
+export function nodeId(node) {
   return md5.hash((rec(node).trim() + '#' + node.textContent.trim()).trim())
 }
 
