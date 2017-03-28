@@ -7,7 +7,7 @@ import walker from './walker'
 
 // create service instance
 let service = createService({
-  base_url: 'http://localhost:8002/',
+  base_url: 'http://rev-js-api-revup.reverieinc.com/',
   headers: {
     'rev-api-key': 'TEST_API_KEY',
     'rev-app-id': 'TEST_APP_ID',
