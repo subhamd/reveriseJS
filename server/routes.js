@@ -48,7 +48,7 @@ export default function makeRoutes(app) {
         objForEach(dict.entries, (entry, key) => {
           if(entry.status == 'published') {
             delete entry.history
-            published[key] = entry
+            published[entry.id] = entry
           }
         })
         res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed", published })
@@ -100,7 +100,9 @@ export default function makeRoutes(app) {
 
     strManager.getStrings(apikey, __appid, dict_key, status)
     .then(data => {
-      res.json(data)
+      let array = []
+      objForEach(data, item => array.push(item))
+      res.json(array)
     })
     .catch(err => {
       console.log(err)
@@ -108,6 +110,8 @@ export default function makeRoutes(app) {
     })
   })
 
+
+  // update an entry in the dictionary
   app.post('/update-entry', (req, res) => {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
@@ -115,6 +119,22 @@ export default function makeRoutes(app) {
         { dict_key, node_key, node_data } = req.body
     strManager.updateEntry(apikey, __appid, dict_key, node_key, node_data)
     .then(data => res.json(data))
+  })
+
+
+  // change the state of an entry
+  app.post('/get-dicts', (req, res) => {
+    let apikey = req.headers['rev-api-key'],
+        appid = req.headers['rev-app-id'],
+        __appid = appid.replace('.', '~')
+    strManager.getDicts(apikey, __appid)
+    .then(dicts => {
+      res.json(dicts)
+    })
+    .catch(err => {
+      console.log(err)
+      res.json("Error occured while trying to fetch dictionary infos.")
+    })
   })
 
 }

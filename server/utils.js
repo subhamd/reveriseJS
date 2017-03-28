@@ -26,7 +26,7 @@ export function _m(obj, paths, values) {
       if(!cur_obj[key]) {
         cur_obj[key] = {}
       }
-    
+
       if(index != (arr.length - 1)) cur_obj = cur_obj[key]
       else cur_obj[key] = value
     })

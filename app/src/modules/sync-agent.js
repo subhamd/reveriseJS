@@ -9,8 +9,8 @@ import walker from './walker'
 let service = createService({
   base_url: 'http://localhost:8002/',
   headers: {
-    'rev-api-key': 'DEV_API_KEY',
-    'rev-app-id': 'DEV_APP_ID',
+    'rev-api-key': 'TEST_API_KEY',
+    'rev-app-id': 'TEST_APP_ID',
     'Content-Type': 'application/json'
   }
 })
@@ -46,29 +46,32 @@ function factory () {
         if(!cached) {
           service.submit().then(response => {
             updateStorage(response)
-            resolve(response)
+            resolve({ data: dictionary, settings: getObject('__settings__') })
           })
         }
         else {
+          // validate if the cache is up to date
           service.checkUpdate(dict_key, cached.lastUpdated).then(response => {
+
+            console.log(response)
 
             if(response.update_status === 'UPDATE_AVAILABLE') {
               updateStorage(response)
-              resolve(response)
+              resolve({ data: dictionary, settings: getObject('__settings__') })
             }
 
             else if(response.update_status === 'UPDATE_UNAVAILABLE') {
-              getObject(dict_key)
-              resolve(response)
+              makeInMemoryDictionary(cached)
+              resolve({ data: dictionary, settings: getObject('__settings__') })
             }
 
             else if(response.update_status === 'NODATA')
               service.submit().then(response => {
                 updateStorage(response)
-                resolve(response)
+                resolve({ data: dictionary, settings: getObject('__settings__') })
               })
 
-            else reject(make_error('Failed'))
+            else reject(make_error('Unknown error in file sync-agent'))
           })
         }
 

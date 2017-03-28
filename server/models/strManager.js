@@ -1,3 +1,4 @@
+import * as State from '../consts/stateTypes'
 import dbc from '../db'
 import Promise from 'bluebird'
 import objectAssign from 'object-assign'
@@ -7,7 +8,7 @@ import { _m, _g, objForEach, now } from '../utils'
 
 export default function strManagerFactory() {
   let _langs = ['hindi', 'bengali', 'assamese', 'gujarati', 'kannada', 'marathi', 'malayalam', 'odia', 'telugu', 'tamil', 'punjabi'],
-      _availableLang = ['hindi', 'kannada', 'punjabi']
+      _availableLang = ['hindi', 'kannada', 'punjabi', 'malayalam', 'tamil']
 
   // apply translation to a document
   function applyTranslation(doc, appid, dict_key, data) {
@@ -16,27 +17,23 @@ export default function strManagerFactory() {
         db_dictionary_entries_arr = _g(doc, `apps^${appid}^dictionary^${dict_key}^entries`),
         db_dictionary_entries = {}
 
+    // entry(array) -> entry(Map)
     db_dictionary_entries_arr.forEach(entry => {
       db_dictionary_entries[entry.id] = entry
     })
 
-    if(db_dictionary_entries === data) { // new dictionary
-      objForEach(db_dictionary_entries, (entry, key) => {
+    // only add new nodeids
+    objForEach(data, (entry, key) => {
+      if(!db_dictionary_entries[key]) {
+        db_dictionary_entries[key] = entry
+      }
+    })
+
+    objForEach(db_dictionary_entries, (entry, key) => {
+      if(entry.status === State.PENDING) {
         source_strings.push({ id: entry.id, value: entry.value })
-      })
-    } else {  // existing dictionary
-      objForEach(data, (entry, key) => {
-        // only add new nodeids
-        if(!db_dictionary_entries[key]) {
-          db_dictionary_entries[key] = entry
-        }
-      })
-      objForEach(db_dictionary_entries, (entry, key) => {
-        if(entry.status === 'notprocessed') {
-          source_strings.push({ id: entry.id, value: entry.value })
-        }
-      })
-    }
+      }
+    })
 
     // _availableLang is the order of promise seriese
     if(source_strings.length) {
@@ -44,11 +41,12 @@ export default function strManagerFactory() {
         translate_promises.push(translation(source_strings, lang))
       })
 
-      return Promise.all(translate_promises)
+    return Promise.all(translate_promises)
       .then(responses => { //array of array of strings
 
         _m(doc, [`apps^${appid}^dictionary^${dict_key}^__meta__^lastUpdated`], [ now() ])
 
+        // update entries with translated strings
         _availableLang.forEach((lang, index) => [
           responses[index].forEach((response) => {
             _m(db_dictionary_entries,
@@ -60,16 +58,25 @@ export default function strManagerFactory() {
             [ response.value, now(), 'processed' ])
           })
         ])
+
+        // entry(Map) -> entry(array)
+        db_dictionary_entries_arr = []
+        objForEach(db_dictionary_entries, (entry, key) => {
+          db_dictionary_entries_arr.push(entry)
+        })
+        // write update to the document object
+        _m(doc, [`apps^${appid}^dictionary^${dict_key}^entries`], [ db_dictionary_entries_arr ])
         return doc
       })
     }
 
+    // if no new strings added return original document back
     return Promise.resolve(doc)
   }
 
   return {
     // sync with client
-    syncDictionary: (apikey, appid, req_body) => {
+    syncDictionary (apikey, appid, req_body) {
       let dict_key = req_body.dict_key,
           new_dict_data = req_body.data,
           dict_url = req_body.url,
@@ -97,7 +104,7 @@ export default function strManagerFactory() {
 
         // augment incomming data
         objForEach(new_dict_data, (item) => {
-          item.status = 'notprocessed'
+          item.status = State.PENDING
           item.history = []
           _langs.forEach(lang => item[lang] = item.value)
         })
@@ -133,12 +140,12 @@ export default function strManagerFactory() {
     },
 
     // add a dictionary key
-    addDictionaryEntry: (apikey, appid, dict_key) => {
+    addDictionaryEntry (apikey, appid, dict_key) {
       console.log("Here it is.")
     },
 
     // will return a dictionary for a specific url
-    getPublishedData: (apikey, appid, dictionary_id) => {
+    getPublishedData (apikey, appid, dictionary_id) {
       let __appid = appid.replace('.', '~')
 
       // connect
@@ -161,7 +168,7 @@ export default function strManagerFactory() {
             published = {}
         // delete history from result
         data.entries.forEach(entry => {
-          if(entry.status === 'published') {
+          if(entry.status === State.PUBLISHED) {
             delete entry.history
             published[entry.id] = entry
           }
@@ -175,7 +182,7 @@ export default function strManagerFactory() {
     },
 
     // get phrases with status
-    getStrings: (apikey, appid, dict_key, status) => {
+    getStrings (apikey, appid, dict_key, status) {
       return dbc.connect()
       .then(db => {
         let filter_clause = _m({}, [`apps.${appid}.dictionary.${dict_key}.entries`], [true]);
@@ -186,7 +193,7 @@ export default function strManagerFactory() {
           let dict_entries = _g(doc, `apps^${appid}^dictionary^${dict_key}^entries`),
               filtered = {}
 
-          if(status !== 'any') {
+          if(status !== State.ANY) {
             dict_entries.forEach(entry => {
               if(entry.status == status) {
                 filtered[entry.id] = entry
@@ -204,7 +211,7 @@ export default function strManagerFactory() {
     },
 
     // update a single node
-    updateEntry: (apikey, appid, dict_key, node_key, new_value) => {
+    updateEntry (apikey, appid, dict_key, node_key, new_value) {
       return dbc.connect()
       .then(db => {
 
@@ -222,6 +229,10 @@ export default function strManagerFactory() {
         _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.lastUpdated`)
         _values.push(now())
 
+        // dictionary is modified so update timestamp of the dictioanry
+        _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.__meta__.lastUpdated`)
+        _values.push(now())
+
         // save snapshot in history
         _paths.push(`$push^apps.${appid}.dictionary.${dict_key}.entries.$.history`)
         _values.push({ updatedOn: now(), new_value })
@@ -229,6 +240,27 @@ export default function strManagerFactory() {
         return db.collection(apikey).update(
           _m({}, [`apps.${appid}.dictionary.${dict_key}.entries.id`], [ node_key ]),
           _m({}, _paths, _values))
+      })
+    },
+
+    getDicts(apikey, appid) {
+      let search_clause = _m({}, [`apps.${appid}`], [{ $exists: true }]),
+          filter_clause = _m({}, [`apps.${appid}.dictionary`], [true])
+
+      return dbc.connect()
+      .then(db => {
+        return db.collection(apikey).findOne(search_clause, filter_clause)
+      })
+      .then(doc => {
+        let keys = [],
+            dictionary = _g(doc, `apps^${appid}^dictionary`)
+
+        if(!doc) return []
+
+        objForEach(dictionary, (val, key) => {
+          keys.push({ key, url: val.__meta__.url })
+        })
+        return keys
       })
     }
   }

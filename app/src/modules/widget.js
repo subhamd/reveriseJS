@@ -1,4 +1,5 @@
 import { style } from './style'
+import { getObject, setObject } from './storage-man'
 
 /*
   This module handles localization widget creation,
@@ -18,7 +19,7 @@ const widgetHTML =
   </li>
   <li>
     <ul id="rev-select">
-      <li data-lang="english" class="active"><a href="#english" data-nolocalize="true">English</a></li>
+      <li data-lang="english"><a href="#english" data-nolocalize="true">English</a></li>
       <li data-lang="hindi"><a href="#hindi" data-nolocalize="true">Hindi</a></li>
       <li data-lang="punjabi"><a href="#punjabi" data-nolocalize="true">Punjabi</a></li>
       <li data-lang="gujarati"><a href="#gujarati" data-nolocalize="true">Gujarati</a></li>
@@ -28,6 +29,8 @@ const widgetHTML =
 
 // call this method from window.onload
 export default function create() {
+  let settings = getObject('__settings__')
+
   // inject widget styles
   let styleElement = document.createElement('style'),
       styleContent = document.createTextNode(style);
@@ -51,6 +54,11 @@ export default function create() {
   langList.style.height = 0
   langList.style.visibility = 'visible'
   langList.dataset.collapsed = true
+
+  let selectedLi = `#rev-select li[data-lang=${ settings.currentLang == 'value' ? 'english': settings.currentLang }]`
+  console.log(selectedLi)
+  document.querySelector(selectedLi)
+  .className = 'active'
 
   // collapse/reveal logic
   document.querySelector('#rev-lang ul h3').addEventListener('click', function(e) {
