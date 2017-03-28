@@ -21,8 +21,9 @@ const widgetHTML =
     <ul id="rev-select">
       <li data-lang="english"><a href="#english" data-nolocalize="true">English</a></li>
       <li data-lang="hindi"><a href="#hindi" data-nolocalize="true">Hindi</a></li>
-      <li data-lang="punjabi"><a href="#punjabi" data-nolocalize="true">Punjabi</a></li>
-      <li data-lang="gujarati"><a href="#gujarati" data-nolocalize="true">Gujarati</a></li>
+	<li data-lang="punjabi"><a href="#punjabi" data-nolocalize="true">Punjabi</a></li>
+      <li data-lang="kannada"><a href="#kannada" data-nolocalize="true">Kannada</a></li>
+      <li data-lang="telugu"><a href="#telugu" data-nolocalize="true">Telugu</a></li>
     </ul>
   </li>
  </ul>`;
