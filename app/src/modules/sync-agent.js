@@ -9,8 +9,8 @@ import walker from './walker'
 let service = createService({
   base_url: 'http://localhost:8002/',
   headers: {
-    'rev-api-key': 'TEST_API_KEY',
-    'rev-app-id': 'TEST_APP_ID',
+    'rev-api-key': 'DEV_API_KEY',
+    'rev-app-id': 'DEV_APP_ID',
     'Content-Type': 'application/json'
   }
 })

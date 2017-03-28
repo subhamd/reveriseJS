@@ -56,7 +56,7 @@ export default function create() {
   langList.dataset.collapsed = true
 
   let selectedLi = `#rev-select li[data-lang=${ settings.currentLang == 'value' ? 'english': settings.currentLang }]`
-  console.log(selectedLi)
+
   document.querySelector(selectedLi)
   .className = 'active'
 
