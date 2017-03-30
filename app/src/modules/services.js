@@ -29,7 +29,8 @@ function factory(config) {
         }
       })
 
-      return post(`${base_url}submit`, req_data, headers)
+      // 5 min timeout for translation to happen on the backend
+      return post(`${base_url}submit`, req_data, { ...headers, timeout: (5 * 60000) })
     },
 
     // fetch a dictionary from backend

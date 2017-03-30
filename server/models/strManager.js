@@ -8,7 +8,7 @@ import { _m, _g, objForEach, now } from '../utils'
 
 export default function strManagerFactory() {
   let _langs = ['hindi', 'bengali', 'assamese', 'gujarati', 'kannada', 'marathi', 'malayalam', 'odia', 'telugu', 'tamil', 'punjabi'],
-      _availableLang = ['hindi', 'kannada', 'punjabi', 'malayalam', 'tamil']
+      _availableLang = ['hindi', 'punjabi', 'kannada', 'telugu']
 
   // apply translation to a document
   function applyTranslation(doc, appid, dict_key, data) {
@@ -95,7 +95,7 @@ export default function strManagerFactory() {
         return Promise.resolve(doc)
       })
       .then(doc => {
-        console.log('Modifying the doc...')
+        console.log('Formatting document...')
         // if no document found then it is an error
         if( !doc ) {
           reject("No document found in this collection.")
@@ -111,28 +111,33 @@ export default function strManagerFactory() {
 
         // create an app if not already created
         if(!doc.apps[__appid]) {
-          let entries = []
-          objForEach(new_dict_data, (entry) => {
-            entries.push(entry)
-          })
-
           // default entry
           doc.apps[__appid] = {
             appid,
             dictionary: {}
           }
+        }
+
+        // create a dictionary under the app if not already created
+        if(!doc.apps[__appid][dictionary][dict_key]) {
+          let entries = []
+          objForEach(new_dict_data, (entry) => {
+            entries.push(entry)
+          })
+
           doc.apps[__appid].dictionary[dict_key] = { __meta__: {}, entries: entries }
           doc.apps[__appid].dictionary[dict_key]['__meta__'].lastUpdated = now()
           doc.apps[__appid].dictionary[dict_key]['__meta__'].url = dict_url
         }
+
         return doc
       })
       .then(doc => { // then translate document
-        console.log('Translating the doc...')
+        console.log('Translating document...')
         return applyTranslation(doc, __appid, dict_key, new_dict_data)
       })
       .then(doc => { // then update db
-        console.log('Updating the database..')
+        console.log('Updating database..')
         let _update = {}
         _update[`apps.${__appid}`] = doc.apps[__appid]
         return collection.update( { apps: { $exists: true } }, { $set: _update })
