@@ -31,7 +31,7 @@ export default {
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/',
-    filename: 'scripts/bundle.[hash].js'
+    filename: 'scripts/revlocalize.js'
   },
 
   // module loader section

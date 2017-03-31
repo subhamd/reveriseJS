@@ -15,13 +15,20 @@ export const style =
 	border-radius: 3px;
 	text-align:center;
 	position:fixed;
-	top:50%;
-	right:1px;
+	bottom:1px;
+  right: 1em;
 
 	color: white;
 	box-shadow:
 		0 5px 15px 1px rgba(0, 0, 0, 0.4),
 		0 0 200px 1px rgba(255, 255, 255, 0.5);
+  z-index: 9999999;
+  transition: all .3s;
+  opacity: .5;
+}
+
+#rev-lang:hover {
+  opacity:1;
 }
 
 #rev-lang h3 {

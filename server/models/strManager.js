@@ -113,14 +113,16 @@ export default function strManagerFactory() {
         if(!doc.apps[__appid]) {
           // default entry
           doc.apps[__appid] = {
-            appid,
-            dictionary: {}
+            appid
           }
         }
 
         // create a dictionary under the app if not already created
-        if(!doc.apps[__appid][dictionary][dict_key]) {
+        if(!doc.apps[__appid]['dictionary']) {
           let entries = []
+
+          doc.apps[__appid].dictionary = {}
+
           objForEach(new_dict_data, (entry) => {
             entries.push(entry)
           })
@@ -142,11 +144,6 @@ export default function strManagerFactory() {
         _update[`apps.${__appid}`] = doc.apps[__appid]
         return collection.update( { apps: { $exists: true } }, { $set: _update })
       })
-    },
-
-    // add a dictionary key
-    addDictionaryEntry (apikey, appid, dict_key) {
-      console.log("Here it is.")
     },
 
     // will return a dictionary for a specific url
