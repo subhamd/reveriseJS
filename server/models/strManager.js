@@ -14,7 +14,7 @@ export default function strManagerFactory() {
   function applyTranslation(doc, appid, dict_key, data) {
     let source_strings = [],
         translate_promises = [],
-        db_dictionary_entries_arr = _g(doc, `apps^${appid}^dictionary^${dict_key}^entries`),
+        db_dictionary_entries_arr = _g(doc, `apps^${appid}^dictionary^${dict_key}^entries`) || [],
         db_dictionary_entries = {}
 
     // entry(array) -> entry(Map)
@@ -119,17 +119,27 @@ export default function strManagerFactory() {
 
         // create a dictionary under the app if not already created
         if(!doc.apps[__appid]['dictionary']) {
-          let entries = []
-
           doc.apps[__appid].dictionary = {}
+        }
 
-          objForEach(new_dict_data, (entry) => {
-            entries.push(entry)
-          })
+        // create dictionary entry if doesnt exist already
+        if(!doc.apps[__appid].dictionary[dict_key]) {
+          doc.apps[__appid].dictionary[dict_key] = {}
+        }
 
-          doc.apps[__appid].dictionary[dict_key] = { __meta__: {}, entries: entries }
+        // create meta node
+        if(!doc.apps[__appid].dictionary[dict_key]['__meta__']) {
+          doc.apps[__appid].dictionary[dict_key]['__meta__'] = {}
           doc.apps[__appid].dictionary[dict_key]['__meta__'].lastUpdated = now()
           doc.apps[__appid].dictionary[dict_key]['__meta__'].url = dict_url
+        }
+
+        // create entries
+        if(!doc.apps[__appid].dictionary[dict_key].entries) {
+          doc.apps[__appid].dictionary[dict_key].entries = []
+          objForEach(new_dict_data, (entry) => {
+            entries.push(doc.apps[__appid].dictionary[dict_key].entries)
+          })
         }
 
         return doc
@@ -140,9 +150,10 @@ export default function strManagerFactory() {
       })
       .then(doc => { // then update db
         console.log('Updating database..')
-        let _update = {}
-        _update[`apps.${__appid}`] = doc.apps[__appid]
-        return collection.update( { apps: { $exists: true } }, { $set: _update })
+        return collection.update(
+          _m({}, [`apps^$exists`], [ true ]),
+          _m({}, [`$set^apps.${__appid}`], [ doc.apps[__appid] ])
+        )
       })
     },
 
@@ -254,14 +265,16 @@ export default function strManagerFactory() {
         return db.collection(apikey).findOne(search_clause, filter_clause)
       })
       .then(doc => {
-        let keys = [],
-            dictionary = _g(doc, `apps^${appid}^dictionary`)
+        let keys = []
+        if(!doc) return keys
 
-        if(!doc) return []
+        let dictionary = _g(doc, `apps^${appid}^dictionary`)
+        if(!dictionary) return keys
 
         objForEach(dictionary, (val, key) => {
           keys.push({ key, url: val.__meta__.url })
         })
+
         return keys
       })
     }

@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import dbc from './db'
 import accountFactory from './models/account'
 import strManagerFactory from './models/strManager'
-import { objForEach } from './utils'
+import { objForEach, _g, _m } from './utils'
 
 export default function makeRoutes(app) {
 
@@ -32,13 +32,18 @@ export default function makeRoutes(app) {
       return db.collection(apikey).findOne()
     })
     .then(doc => {
+      let last_updated = _g(doc, `apps^${__appid}^dictionary^${dict_key}^__meta__^lastUpdated`)
+
       // doc doesnt exists
       if(!doc) {
         res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
         return
       }
 
-      let last_updated = doc.apps[__appid].dictionary[dict_key].__meta__.lastUpdated
+      if(!last_updated) {
+        res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
+        return
+      }
 
       if( last_updated > timestamp ) {
         let dict = doc.apps[__appid].dictionary[dict_key],
@@ -51,6 +56,7 @@ export default function makeRoutes(app) {
             published[entry.id] = entry
           }
         })
+
         res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed", published })
       }
       else {
