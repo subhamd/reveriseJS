@@ -25,22 +25,23 @@ export default function makeRoutes(app) {
     // check for update and if available send back the new data
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
-        __appid = appid.replace('.', '~')
+        __appid = appid.replace('.', '~'),
+        db = null
     let { dict_key, timestamp } = req.body
 
-    dbc.connect().then(db => {
-      return db.collection(apikey).findOne()
+    dbc.connect().then(_db => {
+      db = _db
+      return db.collection('APPS').findOne({ apikey, id: appid })
     })
     .then(doc => {
-      let last_updated = _g(doc, `apps^${__appid}^dictionary^${dict_key}^__meta__^lastUpdated`)
+      if(!doc) throw new Error('Invalid apikey or appid')
+      return db.collection('STRINGS').findOne({ id: dict_key })
+    })
+    .then(dict => {
+      let last_updated = dict.__meta__.lastUpdated
 
       // doc doesnt exists
-      if(!doc) {
-        res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
-        return
-      }
-
-      if(!last_updated) {
+      if(!dict) {
         res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
         return
       }
@@ -50,14 +51,10 @@ export default function makeRoutes(app) {
             updatedOn = dict.__meta__.lastUpdated,
             published = {}
 
-        objForEach(dict.entries, (entry, key) => {
-          if(entry.status == 'published') {
-            delete entry.history
-            published[entry.id] = entry
-          }
+        strManager.getPublishedData(dict_key)
+        .then(data => {
+          res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed",  published: data.published })
         })
-
-        res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed", published })
       }
       else {
         res.json({ update_status: 'UPDATE_UNAVAILABLE', updateNeeded: false, msg: "Update not needed", published: {} })
@@ -80,35 +77,25 @@ export default function makeRoutes(app) {
       return db.collection('APPS').findOne({ id: 'DEV_APP_ID', apikey: 'DEV_API_KEY' })
     })
     .then(doc => {
+      // validate app first
       if(!doc) {
-        res.json({ success: false, msg: 'APP validation failed' })
-        return
-      }
+        res.json({ success: false, msg: 'APP validation failed' }); return }
 
       strManager.syncDictionary(doc.apikey, doc.id, req.body)
-
+      .then(() => strManager.getPublishedData(req.body.dict_key))
+      .then(published => {
+        res.json({
+          success: true,
+          msg: 'Successfully received strings.',
+          ...published
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ success: false, msg: 'Something went wrong at backend' })
+      })
     })
 
-
-    //create/update account and sync dictionary
-    // account.createAccount(apikey, appid)
-    // .then(result => {
-    //   return strManager.syncDictionary(apikey, appid, req.body)
-    // })
-    // .then(() => {
-    //   return strManager.getPublishedData(apikey, appid, req.body.dict_key)
-    // })
-    // .then(clientDictionary => {
-    //   res.json({
-    //     success: true,
-    //     msg: 'Successfully received strings.',
-    //     ...clientDictionary
-    //   })
-    // })
-    // .catch(err => {
-    //   console.log(err)
-    //   res.json({ success: false, msg: 'Loading strings failed' })
-    // })
   })
 
 
@@ -116,11 +103,20 @@ export default function makeRoutes(app) {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~'),
+        db = null,
         { dict_key, status } = req.body
 
     console.log(req.body)
 
-    strManager.getStrings(apikey, __appid, dict_key, status)
+    dbc.connect()
+    .then(_db => {
+      db = _db
+      return db.collection('APPS').findOne({ id: appid, apikey })
+    })
+    .then(doc => {
+      if(!doc) throw new Error("Invalid apikey or appid")
+      return strManager.getStrings(dict_key, status)
+    })
     .then(data => {
       let array = []
       objForEach(data, item => array.push(item))
@@ -138,8 +134,17 @@ export default function makeRoutes(app) {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~'),
+        db = null,
         { dict_key, node_key, node_data } = req.body
-    strManager.updateEntry(apikey, __appid, dict_key, node_key, node_data)
+
+    dbc.connect()
+    .then(db => {
+      return db.collection('APPS').findOne({ apikey, id: appid })
+    })
+    .then(doc => {
+      if(!doc) throw new Error("Invalid apikey or appid")
+      return strManager.updateEntry(dict_key, node_key, node_data)
+    })
     .then(data => res.json(data))
   })
 
