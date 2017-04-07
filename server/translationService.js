@@ -1,15 +1,16 @@
 import Promise from 'bluebird'
 import unirest from 'unirest'
+import config from './config'
 
 function translate(entries, target_lang) {
   let source_strings = entries.map(entry => entry.value),
       str_ids = entries.map(entry => entry.id)
 
   return new Promise((resolve, reject) => {
-    unirest.post(`https://api-revup.reverieinc.com/apiman-gateway/reverieinc/localization/1.0?target_lang=${target_lang}&source_lang=english&domain=3`)
+    unirest.post(`${config.translationApiEndPoint}?target_lang=${target_lang}&source_lang=english&domain=3`)
     .headers({
-      "rev-api-key": "FE7JP7xAYGR8lB5XIFBEDYLxzbkWvyL8fD1E",
-      "rev-app-id": "com.nilout",
+      "rev-api-key": config.apikey,
+      "rev-app-id": config.appid,
       "content-type": "application/json"
     })
     .send(JSON.stringify({ data: source_strings } ))

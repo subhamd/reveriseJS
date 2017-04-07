@@ -40,7 +40,9 @@ function factory(config) {
 
     // check for update in a dictionary
     checkUpdate(dict_key, local_timestamp) {
-      return post(`${base_url}update-check`, { dict_key,  timestamp: local_timestamp }, headers)
+      let numStr = 0
+      walker(node => numStr++)
+      return post(`${base_url}update-check`, { dict_key,  timestamp: local_timestamp, numStr }, headers)
     }
 
   }

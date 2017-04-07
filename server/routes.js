@@ -20,7 +20,7 @@ export default function makeRoutes(app) {
   })
 
 
-  // accepts strings returns dictionary if newer
+  // accepts strings, returns dictionary if newer
   app.post('/update-check', (req, res) => {
     // check for update and if available send back the new data
     let apikey = req.headers['rev-api-key'],
@@ -75,26 +75,42 @@ export default function makeRoutes(app) {
     let apikey = req.headers['rev-api-key']
     let appid = req.headers['rev-app-id']
 
+    // validate app
+    dbc.connect().then(db => {
+      return db.collection('APPS').findOne({ id: 'DEV_APP_ID', apikey: 'DEV_API_KEY' })
+    })
+    .then(doc => {
+      if(!doc) {
+        res.json({ success: false, msg: 'APP validation failed' })
+        return
+      }
+
+      strManager.syncDictionary(doc.apikey, doc.id, req.body)
+
+    })
+
+
     //create/update account and sync dictionary
-    account.createAccount(apikey, appid)
-    .then(result => {
-      return strManager.syncDictionary(apikey, appid, req.body)
-    })
-    .then(() => {
-      return strManager.getPublishedData(apikey, appid, req.body.dict_key)
-    })
-    .then(clientDictionary => {
-      res.json({
-        success: true,
-        msg: 'Successfully received strings.',
-        ...clientDictionary
-      })
-    })
-    .catch(err => {
-      console.log(err)
-      res.json({ success: false, msg: 'Loading strings failed' })
-    })
+    // account.createAccount(apikey, appid)
+    // .then(result => {
+    //   return strManager.syncDictionary(apikey, appid, req.body)
+    // })
+    // .then(() => {
+    //   return strManager.getPublishedData(apikey, appid, req.body.dict_key)
+    // })
+    // .then(clientDictionary => {
+    //   res.json({
+    //     success: true,
+    //     msg: 'Successfully received strings.',
+    //     ...clientDictionary
+    //   })
+    // })
+    // .catch(err => {
+    //   console.log(err)
+    //   res.json({ success: false, msg: 'Loading strings failed' })
+    // })
   })
+
 
   app.post('/fetch', (req, res) => {
     let apikey = req.headers['rev-api-key'],
@@ -125,6 +141,21 @@ export default function makeRoutes(app) {
         { dict_key, node_key, node_data } = req.body
     strManager.updateEntry(apikey, __appid, dict_key, node_key, node_data)
     .then(data => res.json(data))
+  })
+
+
+  // update multiple nodes with common value
+  app.post('/update-multi', (req, res) => {
+    let apikey = req.headers['rev-api-key'],
+        appid = req.headers['rev-app-id'],
+        __appid = appid.replace('.', '~'),
+        { dict_key, node_keys, node_data } = req.body
+    strManager.bulkUpdate(apikey, __appid, dict_key, node_keys, node_data)
+    .then(r => res.json(r))
+    .catch(err => {
+      console.log(err)
+      res.json({ success: false, message: 'Failed to perform bulk update' })
+    })
   })
 
 

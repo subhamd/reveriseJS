@@ -9,10 +9,10 @@ import createSynchronizer from './modules/sync-agent'
 
 // on window load
 window.onload = () => {
-
+  window.document.body.style.visibility = 'hidden'
+  
   let sync = createSynchronizer(),
       dict_key =
-
   sync.ensure().then(({ data, settings }) => {
     // create the widget
     createWidget()
@@ -31,6 +31,7 @@ window.onload = () => {
       })
     })
 
+    document.body.style.visibility = 'visible'
   })
 
 }

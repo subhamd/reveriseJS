@@ -23,7 +23,7 @@ function factory () {
   // ensure default settings are present at the backend
   storageInit()
 
-  function updateStorage(response) {
+  function updateStorage( response ) {
     let transformed_data = { lastUpdated: now(), entries: response.published }
     setObject(dict_key, transformed_data)
     makeInMemoryDictionary(transformed_data)

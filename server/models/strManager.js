@@ -35,6 +35,8 @@ export default function strManagerFactory() {
       }
     })
 
+    console.log(`Number of new strings to be translated ${ source_strings.length * _availableLang.length }`)
+
     // _availableLang is the order of promise seriese
     if(source_strings.length) {
       _availableLang.forEach(lang => {
@@ -47,7 +49,7 @@ export default function strManagerFactory() {
         _m(doc, [`apps^${appid}^dictionary^${dict_key}^__meta__^lastUpdated`], [ now() ])
 
         // update entries with translated strings
-        _availableLang.forEach((lang, index) => [
+        _availableLang.forEach((lang, index) => {
           responses[index].forEach((response) => {
             _m(db_dictionary_entries,
             [
@@ -57,7 +59,7 @@ export default function strManagerFactory() {
             ],
             [ response.value, now(), 'processed' ])
           })
-        ])
+        })
 
         // entry(Map) -> entry(array)
         db_dictionary_entries_arr = []
@@ -138,7 +140,7 @@ export default function strManagerFactory() {
         if(!doc.apps[__appid].dictionary[dict_key].entries) {
           doc.apps[__appid].dictionary[dict_key].entries = []
           objForEach(new_dict_data, (entry) => {
-            entries.push(doc.apps[__appid].dictionary[dict_key].entries)
+            doc.apps[__appid].dictionary[dict_key].entries.push(entry)
           })
         }
 
@@ -221,6 +223,50 @@ export default function strManagerFactory() {
           return filtered
         }
       })
+    },
+
+    // update more than one node at a time
+    bulkUpdate (apikey, appid, dict_key, node_keys, new_value) {
+      let allUpdates = []
+
+      return dbc.connect()
+        .then(db => {
+
+          let _paths = [],
+              _values = []
+
+          // dont forget to validate new data before proceeding
+
+          objForEach(new_value, (val, key) => {
+            _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.${key}`)
+            _values.push(val)
+          })
+
+          // additionally update the timestamp
+          _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.lastUpdated`)
+          _values.push(now())
+
+          // save snapshot in history
+          _paths.push(`$push^apps.${appid}.dictionary.${dict_key}.entries.$.history`)
+          _values.push({ updatedOn: now(), new_value })
+
+          allUpdates.push(
+            db.collection(apikey).update(
+              _m({}, [`apps.${appid}.dictionary.${dict_key}`], [{ $exists: true }]),
+              _m({}, [`$set^apps.${appid}.dictionary.${dict_key}.__meta__.lastUpdated`], [ now() ])
+            )
+          )
+
+          node_keys.forEach(nodekey => {
+            allUpdates.push(
+              db.collection(apikey).update(
+                _m({}, [`apps.${appid}.dictionary.${dict_key}.entries`], [ { $elemMatch: { id: nodekey } } ]),
+                _m({}, _paths, _values))
+            )
+          })
+
+          return Promise.all(allUpdates)
+        })
     },
 
     // update a single node
