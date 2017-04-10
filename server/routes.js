@@ -1,7 +1,6 @@
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import dbc from './db'
-import accountFactory from './models/account'
 import strManagerFactory from './models/strManager'
 import { objForEach, _g, _m } from './utils'
 
@@ -11,8 +10,7 @@ export default function makeRoutes(app) {
   app.use(cors())
   app.use(bodyParser.json({limit: '50mb'}))
 
-  let account     = accountFactory(),
-      strManager  = strManagerFactory()
+  let strManager  = strManagerFactory()
 
   // get routes
   app.get('/', (req, res) => {
@@ -95,6 +93,7 @@ export default function makeRoutes(app) {
   })
 
 
+  // fetch strings with given status
   app.post('/fetch', (req, res) => {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
@@ -109,8 +108,8 @@ export default function makeRoutes(app) {
       db = _db
       return db.collection('APPS').findOne({ id: appid, apikey })
     })
-    .then(doc => {
-      if(!doc) throw new Error("Invalid apikey or appid")
+    .then(app => {
+      if(!app) throw new Error("Invalid apikey or appid")
       return strManager.getStrings(dict_key, status)
     })
     .then(data => {
