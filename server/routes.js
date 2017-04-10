@@ -47,10 +47,6 @@ export default function makeRoutes(app) {
       }
 
       if( last_updated > timestamp ) {
-        let dict = doc.apps[__appid].dictionary[dict_key],
-            updatedOn = dict.__meta__.lastUpdated,
-            published = {}
-
         strManager.getPublishedData(dict_key)
         .then(data => {
           res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed",  published: data.published })
@@ -154,8 +150,17 @@ export default function makeRoutes(app) {
     let apikey = req.headers['rev-api-key'],
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~'),
+        db = null,
         { dict_key, node_keys, node_data } = req.body
-    strManager.bulkUpdate(apikey, __appid, dict_key, node_keys, node_data)
+
+    dbc.connect().then(_db => {
+      db = _db
+      return db.collection('APPS').findOne({ apikey, id: appid })
+    })
+    .then(app => {
+      if(!app) throw new Error("Invalid apikey or appid")
+      return strManager.bulkUpdate(dict_key, node_keys, node_data)
+    })
     .then(r => res.json(r))
     .catch(err => {
       console.log(err)

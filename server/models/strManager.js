@@ -144,7 +144,6 @@ export default function strManagerFactory() {
         console.log("Writting translated dictionary to the DB.")
         return db.collection('STRINGS').update({ id: dict_key }, { $set: { 'entries': updated_dict.entries } })
       })
-
     },
 
     // will return a dictionary for a specific url
@@ -183,7 +182,7 @@ export default function strManagerFactory() {
         let map = {}
         if(!dict || !dict.entries) return {}
 
-        if(status == 'ANY') dict.entries.forEach(e => map[e.id] = e)
+        if(status.toUpperCase() == 'ANY') dict.entries.forEach(e => map[e.id] = e)
         else {
           dict.entries.forEach(e => {
             if(e.status == status) map[e.id] = e
@@ -194,45 +193,28 @@ export default function strManagerFactory() {
     },
 
     // update more than one node at a time
-    bulkUpdate (apikey, appid, dict_key, node_keys, new_value) {
-      let allUpdates = []
+    bulkUpdate (dict_key, node_keys, new_value) {
+      let allUpdates = [],
+          db = null,
+          updatable = {
+            $set: { '__meta__.lastUpdated': now(), 'entries.$.lastUpdated': now() },
+            $push: { 'entries.$.history': { lastUpdated: now(), new_value } }
+          }
 
       return dbc.connect()
-        .then(db => {
-
-          let _paths = [],
-              _values = []
+        .then(_db => {
+          db = _db
 
           // dont forget to validate new data before proceeding
 
-          objForEach(new_value, (val, key) => {
-            _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.${key}`)
-            _values.push(val)
+          objForEach(new_value, (value, key) => {
+            updatable.$set[`entries.$.${key}`] = value
           })
 
-          // additionally update the timestamp
-          _paths.push(`$set^apps.${appid}.dictionary.${dict_key}.entries.$.lastUpdated`)
-          _values.push(now())
-
-          // save snapshot in history
-          _paths.push(`$push^apps.${appid}.dictionary.${dict_key}.entries.$.history`)
-          _values.push({ updatedOn: now(), new_value })
-
-          allUpdates.push(
-            db.collection(apikey).update(
-              _m({}, [`apps.${appid}.dictionary.${dict_key}`], [{ $exists: true }]),
-              _m({}, [`$set^apps.${appid}.dictionary.${dict_key}.__meta__.lastUpdated`], [ now() ])
-            )
+          // cannot update multiple array elements at one go thus call update multiple time
+          node_keys.forEach(node_key =>
+            allUpdates.push(db.collection('STRINGS').update({ id: dict_key, 'entries.id': node_key }, updatable))
           )
-
-          node_keys.forEach(nodekey => {
-            allUpdates.push(
-              db.collection(apikey).update(
-                _m({}, [`apps.${appid}.dictionary.${dict_key}.entries`], [ { $elemMatch: { id: nodekey } } ]),
-                _m({}, _paths, _values))
-            )
-          })
-
           return Promise.all(allUpdates)
         })
     },
@@ -241,7 +223,7 @@ export default function strManagerFactory() {
     updateEntry (dict_key, node_key, new_value) {
       let db = null,
           updatable = {
-            $set: { lastUpdated: now(), 'entries.$.lastUpdated': now() },
+            $set: { '__meta__.lastUpdated': now(), 'entries.$.lastUpdated': now() },
             $push: { 'entries.$.history': { lastUpdated: now(), new_value } }
           }
 
