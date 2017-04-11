@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <title>Translation Widget</title>
     <script src="/scripts/bundle.js"></script>
+    <script>
+      (function(src, config) {
+        var s = document.createElement('script'),b = document.createElement('script')
+        b.appendChild(document.createTextNode('revlocalise.init('+ JSON.stringify(config) +')'));
+        s.src = src;
+        document.head.appendChild(s);
+        document.head.appendChild(b);
+      }('/scripts/bundle.js', { apikey: 'DEV_API_KEY', appid: 'DEV_APP_ID' }))
+    </script>
   </head>
   <body>
     <div class="navbar-main background__peterriver">

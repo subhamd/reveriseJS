@@ -5,17 +5,6 @@ import { now, objForEach, make_error } from './utils'
 import createService from './services'
 import walker from './walker'
 
-// create service instance
-let service = createService({
-  base_url: 'http://localhost:8002/',
-  headers: {
-    'rev-api-key': 'DEV_API_KEY',
-    'rev-app-id': 'DEV_APP_ID',
-    'Content-Type': 'application/json'
-  }
-})
-
-
 function factory () {
   let dictionary   = {},
       dict_key = dictKey()
@@ -39,8 +28,27 @@ function factory () {
 
   return {
     // ensure data availability
-    ensure() {
+    ensure(config) {
       let cached = getObject(dict_key)
+
+      /*let service = createService({
+        base_url: 'http://localhost:8002/',
+        headers: {
+          'rev-api-key': 'DEV_API_KEY',
+          'rev-app-id': 'DEV_APP_ID',
+          'Content-Type': 'application/json'
+        }
+      })*/
+
+      // create service instance
+      let service = createService({
+        base_url: config.base_url || 'http://localhost:8002/',
+        headers: {
+          'rev-api-key': config.apikey,
+          'rev-app-id': config.appid,
+          'Content-Type': 'application/json'
+        }
+      })
 
       return new Promise((resolve, reject) => {
         if(!cached) {
@@ -52,8 +60,6 @@ function factory () {
         else {
           // validate if the cache is up to date
           service.checkUpdate(dict_key, cached.lastUpdated).then(response => {
-
-            console.log(response)
 
             if(response.update_status === 'UPDATE_AVAILABLE') {
               updateStorage(response)

@@ -7,35 +7,39 @@ import walker from './modules/walker'
 import { setObject, getObject } from './modules/storage-man'
 import createSynchronizer from './modules/sync-agent'
 
-// on window load
-window.onload = () => {
-  window.document.body.style.visibility = 'hidden'
-  
-  let sync = createSynchronizer(),
-      dict_key =
-  sync.ensure().then(({ data, settings }) => {
-    // create the widget
-    createWidget()
+window.revlocalise = {
 
-    // restore last language
-    objForEach(data.entries, entry => {
-      entry.ref.textContent = entry[ settings.currentLang ]
-    })
+  init(config) {
 
-    // when language is changed
-    setLanguageChangeHandler(lang => {
-      settings.currentLang = lang == 'english' ? 'value' : lang
-      setObject('__settings__', settings)
-      objForEach(data.entries, entry => {
-        entry.ref.textContent = entry[settings.currentLang]
+    window.onload = () => {
+
+      window.document.body.style.visibility = 'hidden'
+
+      let sync = createSynchronizer()
+
+      sync.ensure( config ).then(({ data, settings }) => {
+        // create the widget
+        createWidget()
+
+        // restore last language
+        objForEach(data.entries, entry => {
+          entry.ref.textContent = entry[ settings.currentLang ]
+        })
+
+        // when language is changed
+        setLanguageChangeHandler(lang => {
+          settings.currentLang = lang == 'english' ? 'value' : lang
+          setObject('__settings__', settings)
+          objForEach(data.entries, entry => {
+            entry.ref.textContent = entry[settings.currentLang]
+          })
+        })
+
+        document.body.style.visibility = 'visible'
       })
-    })
-
-    document.body.style.visibility = 'visible'
-  })
-
+    }
+  }
 }
-
 
 
 
