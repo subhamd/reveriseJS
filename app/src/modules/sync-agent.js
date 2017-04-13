@@ -31,15 +31,6 @@ function factory () {
     ensure(config) {
       let cached = getObject(dict_key)
 
-      /*let service = createService({
-        base_url: 'http://localhost:8002/',
-        headers: {
-          'rev-api-key': 'DEV_API_KEY',
-          'rev-app-id': 'DEV_APP_ID',
-          'Content-Type': 'application/json'
-        }
-      })*/
-
       // create service instance
       let service = createService({
         base_url: config.base_url || 'http://localhost:8002/',

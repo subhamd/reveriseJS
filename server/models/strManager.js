@@ -26,7 +26,7 @@ export default function strManagerFactory() {
       if(!db_dict_map[entry.id]) new_string_entries.push(entry)
     })
 
-    console.log(`Number of new strings to be translated ${ new_string_entries.length * _availableLang.length }`)
+    console.log(`Number of new strings to be translated ${ new_string_entries.length }`)
 
     // _availableLang is the order of promise seriese
     if(new_string_entries.length) {

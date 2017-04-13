@@ -5,13 +5,8 @@
     <title>Translation Widget</title>
     <script src="/scripts/bundle.js"></script>
     <script>
-      (function(src, config) {
-        var s = document.createElement('script'),b = document.createElement('script')
-        b.appendChild(document.createTextNode('revlocalise.init('+ JSON.stringify(config) +')'));
-        s.src = src;
-        document.head.appendChild(s);
-        document.head.appendChild(b);
-      }('/scripts/bundle.js', { apikey: 'DEV_API_KEY', appid: 'DEV_APP_ID' }))
+      document.write('<meta name="google" value="notranslate">')
+      revlocalise.init({ apikey: 'DEV_API_KEY', appid: 'DEV_APP_ID' })
     </script>
   </head>
   <body>
@@ -35,7 +30,7 @@
         </div>
       </div>
     </div>
-    <div class="page">
+    <div class="page" id="page">
       <div class="row">
         <div class="span-l12">
           <div class="info-block gradient__twitch">

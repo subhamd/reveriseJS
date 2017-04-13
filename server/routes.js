@@ -36,13 +36,13 @@ export default function makeRoutes(app) {
       return db.collection('STRINGS').findOne({ id: dict_key })
     })
     .then(dict => {
-      let last_updated = dict.__meta__.lastUpdated
-
       // doc doesnt exists
       if(!dict) {
         res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
         return
       }
+
+      let last_updated = dict.__meta__.lastUpdated
 
       if( last_updated > timestamp ) {
         strManager.getPublishedData(dict_key)
@@ -63,12 +63,13 @@ export default function makeRoutes(app) {
   // submit strings
   app.post('/submit', (req, res) => {
     // get the apikey
-    let apikey = req.headers['rev-api-key']
-    let appid = req.headers['rev-app-id']
+    let apikey = req.headers['rev-api-key'],
+        appid = req.headers['rev-app-id'],
+        __appid = appid.replace('.', '~')
 
     // validate app
     dbc.connect().then(db => {
-      return db.collection('APPS').findOne({ id: 'DEV_APP_ID', apikey: 'DEV_API_KEY' })
+      return db.collection('APPS').findOne({ id: __appid, apikey })
     })
     .then(doc => {
       // validate app first

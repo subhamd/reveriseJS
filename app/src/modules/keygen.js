@@ -26,6 +26,11 @@ export function nodePos(node) {
 
 // this recursive function calculates the unique node id
 function rec(node) {
+
+  if(!(node.parentNode || node.ownerElement)) {
+    return "invalid"
+  }
+
   if(node.nodeName === 'HTML') return 'HTML'
   // get the siblings
   let siblings = (node.parentNode || node.ownerElement).childNodes
