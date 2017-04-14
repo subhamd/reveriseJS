@@ -1,63 +1,57 @@
 import '../styles/main.scss'
+
 import walker from './modules/walker'
+import observer from './modules/observer'
 import { objForEach } from './modules/utils'
 import createSynchronizer from './modules/sync-agent'
+import { languages, available_langs} from './modules/langs'
 import { nodeId, nodePos, dictKey } from './modules/keygen'
 import { setObject, getObject } from './modules/storage-man'
 import createWidget, { setLanguageChangeHandler } from './modules/widget'
 
 // retrieve cached dictionary and settings
-let _dict = getObject(dictKey()), settings = getObject('__settings__'),
-    obs_dictionary = null;
-_dict && (obs_dictionary = _dict.entries);
+let obs_dictionary = getObject(dictKey()),
+    settings = getObject('__settings__'),
+    obs_dictionary_entries = null;
+
+obs_dictionary && (obs_dictionary_entries = obs_dictionary.entries);
 settings || (settings = { currentLang: 'value' });
 
 // expose the obs_dictionary as global
 window.obs_dictionary = obs_dictionary
+window.obs_dictionary_entries = obs_dictionary_entries
 
 window.revlocalise = {
 
   getVersion() { return "0.0.1" },
 
-  setLanguage(lang) {},  //to-do
-  getTranslation(string, language) {}, //to-do
+  setLanguage( lang, syn_dictionary ) {
+    if(available_langs.indexOf(lang) == -1) return false
 
-  init(config) {
+    settings.currentLang = lang == 'english' ? 'value' : lang
+    setObject('__settings__', settings)
 
-    let attribs = ['placeholder', 'title']
+    if(window.obs_dictionary)
+    objForEach(window.obs_dictionary_entries, entry => {
+      if(entry.ref)
+        entry.ref.nodeValue = entry[settings.currentLang]
+    })
+    else if(syn_dictionary) {
+      objForEach(syn_dictionary.entries, (value, key) => {
+        value.ref.nodeValue = value[settings.currentLang]
+      })
+    }
 
-    // install mutation observer
-    var observer = new MutationObserver(mutations => {
-      mutations.forEach( mutation => {
+    if(!syn_dictionary) setLanguageChangeHandler(lang)
 
-        // handle newly inserted nodes
-        if(mutation.type == 'childList') {
-          mutation.addedNodes.forEach(node => {
-            let _nodeId = nodeId(node)
-            if(obs_dictionary && obs_dictionary[_nodeId]) {
-              obs_dictionary[_nodeId].ref = node
-              node.nodeValue = obs_dictionary[_nodeId][settings.currentLang]
-            }
-          })
-        }
-      });
-    });
+  },
+
+  getTranslation(string, language) { }, //to-do
+
+  init( config ) {
 
     // start observing
-    observer.observe(document, { attributes: true, childList: true, subtree: true });
-
-    // add title ref -> title is not observed
-    setTimeout(() => {
-      let title = document.querySelector('title')
-      if(title) {
-        let textNode = title.childNodes[0],
-        _id = nodeId(textNode)
-        if(obs_dictionary && obs_dictionary[_id]) {
-          obs_dictionary[_id].ref = textNode
-          textNode.nodeValue = obs_dictionary[_id][settings.currentLang]
-        }
-      }
-    }, 100)
+    observer(obs_dictionary_entries, settings)
 
     // on load event
     window.onload = () => {
@@ -68,38 +62,39 @@ window.revlocalise = {
         // create the widget
         createWidget()
 
-        if(!obs_dictionary) {
+        // if obs_dictionary does not exists, use the syn_dictionary
+        if(!(obs_dictionary && obs_dictionary_entries)) {
           objForEach(syn_dictionary.entries, (value, key) => {
             value.ref.nodeValue = value[settings.currentLang]
           })
         }
         // patch update
-        if(obs_dictionary && syn_dictionary.lastUpdated > _dict.lastUpdated) {
+        if(obs_dictionary && ( syn_dictionary.lastUpdated > obs_dictionary.lastUpdated ) ) {
+
+          // remove extra items from obs dictionary
+          objForEach(obs_dictionary_entries, ( value, key ) => {
+            if(!syn_dictionary.entries[key]) {
+              obs_dictionary_entries[key].ref.nodeValue = obs_dictionary_entries[key].value
+              delete obs_dictionary_entries[key]
+            }
+          })
+
           objForEach(syn_dictionary.entries, (value, key) => {
-            if(syn_dictionary.entries[key].lastUpdated > obs_dictionary[key].lastUpdated) {
+            if(obs_dictionary_entries[key] && ( syn_dictionary.entries[key].lastUpdated > obs_dictionary_entries[key].lastUpdated ) ) {
               console.log("Found one new updated node")
-              obs_dictionary[key].ref.nodeValue = value[ settings.currentLang ]
+              obs_dictionary_entries[key].ref.nodeValue = value[ settings.currentLang ]
+            }
+            if(!obs_dictionary_entries[key]) {
+              obs_dictionary_entries[key] = syn_dictionary.entries[key]
+              syn_dictionary.entries[key].ref.nodeValue = value[ settings.currentLang ]
             }
           })
         }
 
         // when language is changed
         setLanguageChangeHandler(lang => {
-          settings.currentLang = lang == 'english' ? 'value' : lang
-          setObject('__settings__', settings)
-
-          if(window.obs_dictionary) // dict build from observer
-          objForEach(window.obs_dictionary, entry => {
-            if(entry.ref)
-              entry.ref.nodeValue = entry[settings.currentLang]
-          })
-          // obs_dictionary built from initial
-          else objForEach(syn_dictionary.entries, (value, key) => {
-            value.ref.nodeValue = value[settings.currentLang]
-          })
-
+          revlocalise.setLanguage(lang, syn_dictionary)
         })
-
       })
     }
   }

@@ -1,4 +1,4 @@
-export languages = [
+export const languages = [
   'english',
   'hindi',
   'bengali',
@@ -11,3 +11,5 @@ export languages = [
   'tamil',
   'punjabi'
 ]
+
+export const available_langs = ['english', 'hindi', 'punjabi', 'kannada', 'telugu']

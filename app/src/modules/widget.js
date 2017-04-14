@@ -1,5 +1,6 @@
 import { style } from './style'
 import { getObject, setObject } from './storage-man'
+import { languages, available_langs} from './langs'
 
 /*
   This module handles localization widget creation,
@@ -88,5 +89,13 @@ export default function create() {
 }
 
 export function setLanguageChangeHandler(cb) {
-  language_change_handler = cb
+  if(typeof cb === 'function')
+    language_change_handler = cb
+
+  if(typeof cb === 'string' && ( available_langs.indexOf(cb) != -1 ) ) {
+    document.querySelectorAll('#rev-select li').forEach(function(li, index, all_li) {
+      if(li.dataset.lang === cb) li.className = 'active'
+      else li.className = ''
+    })
+  }
 }

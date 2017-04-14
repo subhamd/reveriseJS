@@ -79,6 +79,7 @@ export default function makeRoutes(app) {
       strManager.syncDictionary(doc.apikey, doc.id, req.body)
       .then(() => strManager.getPublishedData(req.body.dict_key))
       .then(published => {
+        // < to-do: remove history from result >
         res.json({
           success: true,
           msg: 'Successfully received strings.',
