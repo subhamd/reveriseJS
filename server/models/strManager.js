@@ -147,7 +147,7 @@ export default function strManagerFactory() {
     },
 
     // will return a dictionary for a specific url
-    getPublishedData (dict_key) {
+    getAllEntries (dict_key) {
       let db = null
 
       // connect
@@ -158,13 +158,17 @@ export default function strManagerFactory() {
       })
       .then(dict => {
         let published = dict.entries || [],
-        map = {}
+        map = {},
+        ids = {} // => ids of all entries
+
         published.forEach(d => {
           if(d.status == 'published') map[d.id] = d
+          ids[d.id] = true
         })
 
         return {
           published: map,
+          allEntryIds: ids,
           updatedOn: dict.__meta__.lastUpdated
         }
       })

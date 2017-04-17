@@ -12,7 +12,8 @@ import createWidget, { setLanguageChangeHandler } from './modules/widget'
 // retrieve cached dictionary and settings
 let obs_dictionary = getObject(dictKey()),
     settings = getObject('__settings__'),
-    obs_dictionary_entries = null;
+    obs_dictionary_entries = null,
+    all_submitted_entry_ids = {};
 
 obs_dictionary && (obs_dictionary_entries = obs_dictionary.entries);
 settings || (settings = { currentLang: 'value' });
@@ -25,6 +26,7 @@ window.revlocalise = {
 
   getVersion() { return "0.0.1" },
 
+  // set translation language
   setLanguage( lang, syn_dictionary ) {
     if(available_langs.indexOf(lang) == -1) return false
 
@@ -42,16 +44,17 @@ window.revlocalise = {
       })
     }
 
+    // if user call, update selection in the widget
     if(!syn_dictionary) setLanguageChangeHandler(lang)
 
   },
 
-  getTranslation(string, language) { }, //to-do
+  getTranslation(node, language) { }, //to-do
 
   init( config ) {
 
     // start observing
-    observer(obs_dictionary_entries, settings)
+    observer(obs_dictionary_entries, settings, all_submitted_entry_ids)
 
     // on load event
     window.onload = () => {

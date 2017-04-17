@@ -45,9 +45,15 @@ export default function makeRoutes(app) {
       let last_updated = dict.__meta__.lastUpdated
 
       if( last_updated > timestamp ) {
-        strManager.getPublishedData(dict_key)
+        strManager.getAllEntries(dict_key)
         .then(data => {
-          res.json({ update_status: 'UPDATE_AVAILABLE', updateNeeded: true, msg: "Update needed",  published: data.published })
+          res.json({
+            update_status: 'UPDATE_AVAILABLE',
+            updateNeeded: true,
+            msg: "Update needed",
+            published: data.published,
+            allEntryIds: data.allEntryIds
+          })
         })
       }
       else {
@@ -77,7 +83,7 @@ export default function makeRoutes(app) {
         res.json({ success: false, msg: 'APP validation failed' }); return }
 
       strManager.syncDictionary(doc.apikey, doc.id, req.body)
-      .then(() => strManager.getPublishedData(req.body.dict_key))
+      .then(() => strManager.getAllEntries(req.body.dict_key))
       .then(published => {
         // < to-do: remove history from result >
         res.json({

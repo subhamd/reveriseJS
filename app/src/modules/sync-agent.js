@@ -1,9 +1,9 @@
+import walker from './walker'
 import Promise from 'bluebird'
-import { storageInit, getObject, setObject } from './storage-man'
+import createService from './services'
 import { nodeId, dictKey } from './keygen'
 import { now, objForEach, make_error } from './utils'
-import createService from './services'
-import walker from './walker'
+import { storageInit, getObject, setObject, clearAll } from './storage-man'
 
 function factory () {
   let dictionary   = {},
@@ -13,7 +13,14 @@ function factory () {
   storageInit()
 
   function updateStorage( response ) {
-    let transformed_data = { lastUpdated: now(), entries: response.published }
+    let transformed_data = {
+      createdOn: now(),
+      updatedOn: response.updatedOn,  // => local creation time
+      entries: response.published
+    }
+
+    // before setting check quota and delete old dictionaries if required
+
     setObject(dict_key, transformed_data)
     makeInMemoryDictionary(transformed_data)
   }
@@ -44,8 +51,14 @@ function factory () {
       return new Promise((resolve, reject) => {
         if(!cached) {
           service.submit().then(response => {
-            updateStorage(response)
-            resolve({ data: dictionary, settings: getObject('__settings__') })
+            if(response.success) {
+              updateStorage(response)
+              resolve({ data: dictionary, settings: getObject('__settings__') })
+            }
+            else {
+              clearAll()
+              reject("Could not submit data.")
+            }
           })
         }
         else {

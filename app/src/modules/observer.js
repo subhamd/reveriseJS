@@ -1,11 +1,18 @@
 import MutationObserver from 'mutation-observer'
 import { nodeId, nodePos, dictKey } from './keygen'
 
-let observer = null
+let observer = null,
+    submitted_entry_ids = null
+
+export function updateSubmittedEntryIds(new_ids) {
+  submitted_entry_ids = new_ids
+}
+
 
 // mutation observer
-export default function(obs_dictionary_entries, settings) {
-  let attribs = ['placeholder', 'title']
+export default function(obs_dictionary_entries, settings, all_submitted_entry_ids) {
+  let attribs = ['placeholder', 'title'],
+      submitted_entry_ids = all_submitted_entry_ids
 
   // if called multiple times, stop the previous observer
   if(observer) observer.disconnect()
@@ -22,6 +29,12 @@ export default function(obs_dictionary_entries, settings) {
             obs_dictionary_entries[_nodeId].ref = node
             node.nodeValue = obs_dictionary_entries[_nodeId][settings.currentLang]
           }
+          if(obs_dictionary_entries && !obs_dictionary_entries[_nodeId]) {
+            // possible new string found
+            // send to backend or batch for later processing
+            // check in the unpublished ids array to see if this is a new string
+            // if so send to backend after a couple minutes
+          }
         })
       }
 
@@ -32,8 +45,8 @@ export default function(obs_dictionary_entries, settings) {
             _nodeId = nodeId(attr)
         if(obs_dictionary_entries && obs_dictionary_entries[_nodeId]) {
           obs_dictionary_entries[_nodeId].ref = attr
-          if(old_val !== obs_dictionary_entries[_nodeId][settings.currentLang])
-            attr.nodeValue = obs_dictionary_entries[_nodeId][settings.currentLang]
+          if(old_val !== obs_dictionary_entries[ _nodeId ][ settings.currentLang ])
+            attr.nodeValue = obs_dictionary_entries[ _nodeId ][ settings.currentLang ]
         }
       }
     });

@@ -9,7 +9,7 @@ function translate(entries, target_lang) {
       chunks = [],
       idchunks = [],
       i = 0, //index
-      c = 1, //chunk size
+      c = 10, //chunk size
       m = Number.parseInt(source_strings.length / c) //num chunk
 
   // break the data into chunks
