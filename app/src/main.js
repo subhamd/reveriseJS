@@ -52,7 +52,7 @@ window.revlocalise.init = function( config ) {
     setTimeout(() => {
       var div = document.createElement('div')
       div.innerHTML = '<div title="This should get detected"><span>Hello Man</span><i>What is this?</i><a href="#">Link man!</a><a>I am king.</a></div>'
-      document.body.prepend(div);
+      document.body.prepend(div)
     }, 5000)
 
     sync.ensure( config, service ).then(({ data: syn_dictionary, settings }) => {
@@ -63,10 +63,6 @@ window.revlocalise.init = function( config ) {
       if(!(obs_dictionary && obs_dictionary_entries)) {
         objForEach(syn_dictionary.entries, (value, key) => {
           obs_dictionary_entries[key] = value
-          // ref may be absent if the node is dynamically inserted
-          //if(value.ref) {
-            //value.ref.nodeValue = value[settings.currentLang]
-          //}
         })
       }
       // patch update
@@ -82,13 +78,8 @@ window.revlocalise.init = function( config ) {
         
         // translate with updated synced dictionary
         objForEach(syn_dictionary.entries, (value, key) => {
-          //if(obs_dictionary_entries[key] && ( syn_dictionary.entries[key].lastUpdated > obs_dictionary_entries[key].lastUpdated ) ) {
-            //console.log("Found one new updated node")
-            //obs_dictionary_entries[key].ref.nodeValue = value[ settings.currentLang ]
-          //}
           if(!obs_dictionary_entries[key]) {
             obs_dictionary_entries[key] = syn_dictionary.entries[key]
-            //syn_dictionary.entries[key].ref.nodeValue = value[ settings.currentLang ]
           }
         })
       }
@@ -129,7 +120,6 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
     else if(syn_dictionary)
       val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]
   })
-
 
   if(!syn_dictionary) setLanguageChangeHandler(lang)
 }

@@ -14,8 +14,13 @@ export function dictKey() {
 /*
  Calculates a unique node is based on the position of the node in the DOM
 */
+let salt = null
 export function nodeId(node) {
-  return md5.hash((rec(node).trim() + '#' + node.textContent.trim()).trim())
+  salt = (rec(node).trim() + '#' + node.textContent.trim()).trim()
+
+  if(salt.indexOf('^') !== -1) return null
+
+  return md5.hash(salt)
 }
 
 // returns the node position in special format
@@ -24,10 +29,12 @@ export function nodePos(node) {
   return rec(node).trim()
 }
 
+// not safe
 export function nodeIdPos(node) {
   //console.log(i++)
-  let node_pos = rec(node).trim(),
-      node_id = md5.hash( ( node_pos + '#' + node.textContent.trim() ).trim() )
+  let node_pos = rec(node).trim()
+
+  let node_id = md5.hash( ( node_pos + '#' + node.textContent.trim() ).trim() )
   return { node_id, node_pos}
 }
 
@@ -37,35 +44,17 @@ export function absNodePos(node) {
 
 // this recursive function calculates the unique node id
 function rec(node) {
-
   if(!(node.parentNode || node.ownerElement)) {
-    return "invalid"
+    return '^ '
   }
-
   if(node.nodeName === 'HTML') return 'HTML'
-  // get the siblings
-  //let siblings = (node.parentNode || node.ownerElement).childNodes
-  //let i = 0
-  // get the index of the current node among the siblings
-  // if(siblings.length == 1) {
-  //   return `${node.nodeName} ` + rec(node.parentNode || node.ownerElement)
-  // }
-
-  // let node_index = 0
-  // for(i = 0; i < siblings.length; i++) {
-  //   if(node === siblings[i]) {
-  //     node_index = i
-  //     break
-  //   }
-  // }
-
   return `${node.nodeName} ` + rec(node.parentNode || node.ownerElement)
 }
 
 function absRec(node) {
 
   if(!(node.parentNode || node.ownerElement)) {
-    return "invalid"
+    return '^ '
   }
 
   if(node.nodeName === 'HTML') return 'HTML'

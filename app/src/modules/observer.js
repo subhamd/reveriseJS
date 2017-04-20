@@ -52,6 +52,7 @@ export default function (obs_dictionary_entries, settings, _submitted_node_ids, 
           }
           
           _nodeId = nodeId(node);
+          if(!_nodeId) return
 
           if(
             node.nodeType === 3 &&
@@ -92,6 +93,7 @@ export default function (obs_dictionary_entries, settings, _submitted_node_ids, 
               }
 
               _nId = nodeId(n)
+              if(!_nId) return
 
               // new node
               if(
@@ -132,6 +134,7 @@ export default function (obs_dictionary_entries, settings, _submitted_node_ids, 
                   }
 
                   _attrId = nodeId(attrs[i])
+                  if(!_attrId) return
 
                   // detect new attributes 
                   if(
@@ -157,24 +160,6 @@ export default function (obs_dictionary_entries, settings, _submitted_node_ids, 
 
         })
       }
-
-      // process attribute change
-      // if(mutation.type == 'attributes' && ( attribs.indexOf( mutation.attributeName ) != -1 ) ) {
-      //   let attr = mutation.target.attributes[ mutation.attributeName ],
-      //       old_val = mutation.oldValue,
-      //       _nodeId = nodeId(attr)
-
-      //   // found in dictionary
-      //   if(obs_dictionary_entries && obs_dictionary_entries[_nodeId]) {
-
-      //     obs_dictionary_entries[_nodeId].ref = attr
-
-      //     // translate
-      //     if(old_val !== obs_dictionary_entries[ _nodeId ][ settings.currentLang ])
-      //       attr.nodeValue = obs_dictionary_entries[ _nodeId ][ settings.currentLang ]
-      //   }
-      // }
-
     });
   });
 
@@ -213,57 +198,24 @@ export default function (obs_dictionary_entries, settings, _submitted_node_ids, 
       })
       
       if(num_nodes > 0) {
-        //console.log("New nodes found: ")
-        //console.log(new_nodes)
-        new_nodes = {}
+        service.submit(req_data).then(response => {
+          new_nodes = {}
+          submitted_node_ids = response.ids //store the new ids 
+
+          console.log("A set of new nodes were submitted.")
+          console.log(response)
+          // storage will be updated on next reload
+        })
+        .catch(err => {
+          console.log('Pushing new strings failed!')
+        })
       }
-
-      // service.submit(req_data).then(response => {
-      //   new_nodes = {}
-      //   submitted_node_ids = response.ids //store the new ids 
-
-      //   console.log("New nodes detected.")
-      //   console.log(response)
-      //   // storage will be updated on next reload
-      // })
-      // .catch(err => {
-      //   console.log('Pushing new strings failed!')
-      // })
-      // else {
-      //   console.log("No new nodes discovered.")
-      // }
+      else {
+        console.log("No new nodes discovered.")
+      }
 
     }, 5000)
   }
-
-  // add title ref -> title is not observed
-  // one time replacement at document load
-  // setTimeout(() => {
-  //   let title = document.querySelector('title')
-  //   if(title) {
-  //     let textNode = title.childNodes[0],
-  //     _id = nodeId(textNode)
-  //     if(obs_dictionary_entries && obs_dictionary_entries[_id]) {
-  //       obs_dictionary_entries[_id].ref = textNode
-  //       textNode.nodeValue = obs_dictionary_entries[_id][settings.currentLang]
-  //     }
-  //   }
-
-  //   // placeholders and titles
-  //   document.querySelectorAll('[placeholder], [title]').forEach(element => {
-  //     let attrs = element.attributes
-
-  //     for(let i = 0; i < attrs.length; i++) {
-  //       if(attribs.indexOf(attrs[i].nodeName.toLowerCase()) != -1) {
-  //         let _nodeId = nodeId(attrs[i])
-  //         if(obs_dictionary_entries && obs_dictionary_entries[_nodeId]) {
-  //           obs_dictionary_entries[_nodeId].ref = attrs[i]
-  //           attrs[i].nodeValue = obs_dictionary_entries[_nodeId][settings.currentLang]
-  //         }
-  //       }
-  //     }
-  //   })
-  // }, 100)
 
   return {
     processed_nodes,
