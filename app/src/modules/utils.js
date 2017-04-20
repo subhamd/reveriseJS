@@ -1,4 +1,4 @@
-import Promise from 'bluebird'
+import Promise from 'promise-polyfill'
 
 // iterate objects
 export function objForEach(obj, cb) {

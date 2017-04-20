@@ -142,7 +142,7 @@ export default function strManagerFactory() {
       //[6] ==> write the dictionary to database
       .then(updated_dict => {
         console.log("Writting translated dictionary to the DB.")
-        return db.collection('STRINGS').update({ id: dict_key }, { $set: { 'entries': updated_dict.entries } })
+        return db.collection('STRINGS').update({ id: dict_key }, { $set: { 'entries': updated_dict.entries, '__meta__.lastUpdated': now() } })
       })
     },
 
@@ -162,13 +162,16 @@ export default function strManagerFactory() {
         ids = {} // => ids of all entries
 
         published.forEach(d => {
-          if(d.status == 'published') map[d.id] = d
+          if(d.status == 'published') {
+            delete d.history
+            map[d.id] = d
+          }
           ids[d.id] = true
         })
 
         return {
           published: map,
-          allEntryIds: ids,
+          ids,
           updatedOn: dict.__meta__.lastUpdated
         }
       })

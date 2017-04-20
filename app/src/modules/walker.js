@@ -35,4 +35,18 @@ function DOM_walker(cb) {
   })
 }
 
+// walk a node recursively for all the childrens
+export function nodeWalker(node, cb) {
+  let walker = document.createTreeWalker(
+      node,
+      NodeFilter.SHOW_TEXT,
+      acceptedNodeFilter,
+      false
+  )
+
+  while(node = walker.nextNode()) {
+    cb && cb(node)
+  }
+}
+
 export default DOM_walker;

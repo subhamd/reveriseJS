@@ -9,14 +9,15 @@ function factory(config) {
 
   return {
     // submit all data to the backend
-    submit() {
+    submit(data) {
 
       let req_data = {
         url: normalizedLocation(),
         dict_key: dictKey(),
         data: {}
       }
-
+      
+      if(!data)
       walker(node => {
         let id = nodeId(node),
             pos = nodePos(node)
@@ -30,7 +31,7 @@ function factory(config) {
       })
 
       // 5 min timeout for translation to happen on the backend
-      return post(`${base_url}submit`, req_data, { ...headers, timeout: (5 * 60000) })
+      return post(`${base_url}submit`, data || req_data, { ...headers, timeout: (5 * 60000) })
     },
 
     // fetch a dictionary from backend

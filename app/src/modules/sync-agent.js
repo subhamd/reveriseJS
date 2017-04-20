@@ -1,6 +1,5 @@
 import walker from './walker'
-import Promise from 'bluebird'
-import createService from './services'
+import Promise from 'promise-polyfill'
 import { nodeId, dictKey } from './keygen'
 import { now, objForEach, make_error } from './utils'
 import { storageInit, getObject, setObject, clearAll } from './storage-man'
@@ -13,10 +12,12 @@ function factory () {
   storageInit()
 
   function updateStorage( response ) {
+
     let transformed_data = {
       createdOn: now(),
       updatedOn: response.updatedOn,  // => local creation time
-      entries: response.published
+      entries: response.published,
+      ids: response.ids
     }
 
     // before setting check quota and delete old dictionaries if required
@@ -35,18 +36,8 @@ function factory () {
 
   return {
     // ensure data availability
-    ensure(config) {
+    ensure(config, service) {
       let cached = getObject(dict_key)
-
-      // create service instance
-      let service = createService({
-        base_url: config.base_url || 'http://localhost:8002/',
-        headers: {
-          'rev-api-key': config.apikey,
-          'rev-app-id': config.appid,
-          'Content-Type': 'application/json'
-        }
-      })
 
       return new Promise((resolve, reject) => {
         if(!cached) {
@@ -56,14 +47,14 @@ function factory () {
               resolve({ data: dictionary, settings: getObject('__settings__') })
             }
             else {
-              clearAll()
+              clearAll() // => clear localStorage
               reject("Could not submit data.")
             }
           })
         }
         else {
           // validate if the cache is up to date
-          service.checkUpdate(dict_key, cached.lastUpdated).then(response => {
+          service.checkUpdate(dict_key, cached.updatedOn).then(response => {
 
             if(response.update_status === 'UPDATE_AVAILABLE') {
               updateStorage(response)

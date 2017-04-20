@@ -38,7 +38,7 @@ export default function makeRoutes(app) {
     .then(dict => {
       // doc doesnt exists
       if(!dict) {
-        res.json({ update_status: 'NODATA', updateNeeded: false, msg: "No update needed" })
+        res.json({ update_status: 'NODATA', update_needed: false, msg: "No data submitted yet." })
         return
       }
 
@@ -48,16 +48,17 @@ export default function makeRoutes(app) {
         strManager.getAllEntries(dict_key)
         .then(data => {
           res.json({
+            update_needed: true,
             update_status: 'UPDATE_AVAILABLE',
-            updateNeeded: true,
             msg: "Update needed",
             published: data.published,
-            allEntryIds: data.allEntryIds
+            updatedOn: data.updatedOn,
+            ids: data.ids
           })
         })
       }
       else {
-        res.json({ update_status: 'UPDATE_UNAVAILABLE', updateNeeded: false, msg: "Update not needed", published: {} })
+        res.json({ update_status: 'UPDATE_UNAVAILABLE', update_needed: false, msg: "Update not needed", published: {} })
       }
     })
     .catch(err => {
