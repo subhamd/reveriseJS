@@ -41,7 +41,7 @@ window.revlocalise.init = function( config ) {
   })
 
   // start observing
-  observer(obs_dictionary_entries, settings, obs_dictionary.ids, service)
+  window.revlocalise.live_nodes = observer(obs_dictionary_entries, settings, obs_dictionary.ids, service)
 
 
   window.onload = () => {
@@ -111,16 +111,26 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
   settings.currentLang = lang == 'english' ? 'value' : lang
   setObject('__settings__', settings)
 
-  if(window.revlocalise.obs_dictionary)
-  objForEach(window.revlocalise.obs_dictionary_entries, entry => {
-    if(entry.ref)
-      entry.ref.nodeValue = entry[settings.currentLang]
+  let nodes = window.revlocalise.live_nodes.processed_nodes,
+      attrs = window.revlocalise.live_nodes.processed_attrs;
+
+  objForEach(nodes, val => {
+    if(window.revlocalise.obs_dictionary) {
+      val.ref.nodeValue = window.revlocalise.obs_dictionary_entries[val.originalId][settings.currentLang]
+    }
+    else if(syn_dictionary)
+      val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]
   })
-  else if(syn_dictionary) {
-    objForEach(syn_dictionary.entries, (value, key) => {
-      if(value.ref) value.ref.nodeValue = value[settings.currentLang]
-    })
-  }
+  
+  objForEach(attrs, val => {
+    if(window.revlocalise.obs_dictionary) {
+      val.ref.nodeValue = window.revlocalise.obs_dictionary_entries[val.originalId][settings.currentLang]
+    }
+    else if(syn_dictionary)
+      val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]
+  })
+
+
   if(!syn_dictionary) setLanguageChangeHandler(lang)
 }
 
