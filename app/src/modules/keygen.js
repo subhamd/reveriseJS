@@ -14,14 +14,21 @@ export function dictKey() {
 /*
  Calculates a unique node is based on the position of the node in the DOM
 */
-export function nodeId(node) {  
+let i = 0
+export function nodeId(node) {
   return md5.hash((rec(node).trim() + '#' + node.textContent.trim()).trim())
 }
 
 // returns the node position in special format
 // which contains position of node within an element as wel as the parent hierarchy
 export function nodePos(node) {
-  return rec(node)
+  return rec(node).trim()
+}
+
+export function nodeIdPos(node) {
+  let node_pos = rec(node).trim(),
+      node_id = md5.hash( ( node_pos + '#' + node.textContent.trim() ).trim() )
+  return { node_id, node_pos}
 }
 
 // this recursive function calculates the unique node id

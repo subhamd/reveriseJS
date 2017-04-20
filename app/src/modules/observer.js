@@ -1,14 +1,15 @@
 import objectAssign from 'object-assign'
 import { objForEach, now } from './utils'
 import MutationObserver from 'mutation-observer'
-import { nodeId, nodePos, dictKey, normalizedLocation } from './keygen'
+import { nodeId, nodePos, nodeIdPos, dictKey, normalizedLocation } from './keygen'
 import { nodeWalker } from './walker'
 
 let observer            = null,
     new_nodes           = {},
     intervalId          = null,
     submitted_node_ids  = null,
-    processed_attrs     = {}; 
+    processed_attrs     = {},
+    processed_nodes     = {};
 
 window.revlocalise = window.revlocalise || {}
 window.revlocalise.showNewNodes = function() { console.log(new_nodes) }
@@ -34,16 +35,34 @@ export default function(obs_dictionary_entries, settings, _submitted_node_ids, s
         
         mutation.addedNodes.forEach(node => {
 
-          let _nodeId = nodeId(node)
+          let { node_id: _nodeId, node_pos: _nodePos } = nodeIdPos(node)
+
+          // if this node is already translated before 
+          if(
+            obs_dictionary_entries &&
+            processed_nodes[_nodePos] && 
+            processed_nodes[_nodePos].updatedOn < now() &&
+            obs_dictionary_entries[processed_nodes[_nodePos].originalId][settings.currentLang] === node.nodeValue
+            ) {
+            console.log("Rejected the node: " + _nodePos + " current value : " + obs_dictionary_entries[processed_nodes[_nodePos].originalId][settings.currentLang] + 
+              " original value : " + node.nodeValue)
+            return;
+          }
+
+          if(
+            node.nodeType === 3 &&
+            submitted_node_ids && 
+            !submitted_node_ids[_nodeId] &&
+            !processed_nodes[_nodePos]
+            ) {
+            if(node.nodeValue.trim() != "") new_nodes[_nodeId] = node
+          }
           
           // translate new text node
           if(obs_dictionary_entries && node.nodeType === 3 && obs_dictionary_entries[_nodeId]) {
+            processed_nodes[_nodePos] = { updatedOn: now(), originalId: _nodeId }
             obs_dictionary_entries[_nodeId].ref = node
             node.nodeValue = obs_dictionary_entries[_nodeId][settings.currentLang]
-          }
-          // detect new text nodes 
-          if(submitted_node_ids && node.nodeType === 3 && !submitted_node_ids[_nodeId]) {
-            if(node.nodeValue.trim() != "") new_nodes[_nodeId] = node
           }
           
           // if element node 
@@ -51,15 +70,35 @@ export default function(obs_dictionary_entries, settings, _submitted_node_ids, s
             // process text nodes 
             // search through children subtree
             nodeWalker(node, n => {
-              let _nodeId = nodeId(n)
+              let { node_id: _nodeId, node_pos: _nodePos } = nodeIdPos(n)
+              
+              // if this node is already translated before 
+              if(
+                obs_dictionary_entries &&
+                processed_nodes[_nodePos] && 
+                processed_nodes[_nodePos].updatedOn < now() &&
+                obs_dictionary_entries[processed_nodes[_nodePos].originalId][settings.currentLang] === n.nodeValue
+                ) {
+                console.log("Rejected the node: " + _nodePos + " current value : " + obs_dictionary_entries[processed_nodes[_nodePos].originalId][settings.currentLang] + 
+                  " original value : " + n.nodeValue)
+                return;
+              }
+              // new node
+              if(
+                n.nodeType === 3 &&
+                n.nodeValue.trim() !== "" &&
+                submitted_node_ids && 
+                !submitted_node_ids[_nodeId] &&
+                !processed_nodes[_nodePos]
+                ) {
+                new_nodes[_nodeId] = n
+              }
+
               // process text nodes
               if(obs_dictionary_entries && obs_dictionary_entries[_nodeId]) {
+                processed_nodes[_nodePos] = { updatedOn: now(), originalId: _nodeId }
                 obs_dictionary_entries[_nodeId].ref = n
                 obs_dictionary_entries[_nodeId].ref.nodeValue = obs_dictionary_entries[_nodeId][settings.currentLang]
-              }
-              // detect new nodes
-              if(submitted_node_ids && n.nodeType === 3 && !submitted_node_ids[_nodeId]) {
-                if(n.nodeValue.trim() != "") new_nodes[_nodeId] = n
               }
             })
 
@@ -69,34 +108,33 @@ export default function(obs_dictionary_entries, settings, _submitted_node_ids, s
               // for each attribute
               for(let i = 0; i < attrs.length; i++) {
                 if(attribs.indexOf(attrs[i].nodeName.toLowerCase()) != -1) {
-                  let _nodeId = nodeId(attrs[i]),
-                      _nodePos = nodePos(attrs[i]);
+                  let { node_id: _nodeId, node_pos: _nodePos } = nodeIdPos(attrs[i])
                   
+                  // encountered before and already translated
+                  if(
+                    obs_dictionary_entries &&
+                    processed_attrs[_nodePos] && 
+                    processed_attrs[_nodePos].updatedOn < now() &&
+                    attrs[i].nodeValue === obs_dictionary_entries[processed_attrs[_nodePos].originalId][settings.currentLang]) {
+                      return
+                  }
+
+                  // detect new attributes 
+                  if(
+                    submitted_node_ids && 
+                    !submitted_node_ids[_nodeId] && 
+                    !processed_attrs[_nodePos] &&
+                    attrs[i].nodeValue.trim() != ""
+                    ) {
+                      processed_attrs[_nodePos] = { updatedOn: now(), originalId: _nodeId } //keep track of processed attributes
+                      new_nodes[_nodeId] = attrs[i]
+                  }
+
                   // translate attributes
                   if(obs_dictionary_entries && obs_dictionary_entries[_nodeId]) {
                     processed_attrs[_nodePos] = { updatedOn: now(), originalId: _nodeId } //keep track of processed attributes
                     obs_dictionary_entries[_nodeId].ref = attrs[i]
                     attrs[i].nodeValue = obs_dictionary_entries[_nodeId][settings.currentLang]
-                  }
-
-                  // detect new attributes 
-                  if(submitted_node_ids && !submitted_node_ids[_nodeId] && attrs[i].nodeValue.trim() != "") {
-                    // not encountered before (must be new attribute)
-                    if(!processed_attrs[_nodePos]) {
-                      processed_attrs[_nodePos] = { updatedOn: now(), originalId: _nodeId } //keep track of processed attributes
-                      new_nodes[_nodeId] = attrs[i]
-                    }
-                    // encountered before
-                    if(
-                      obs_dictionary_entries &&
-                      processed_attrs[_nodePos] && 
-                      processed_attrs[_nodePos].updatedOn < now()) {
-                        let originalId = processed_attrs[_nodePos].originalId
-                        // if already translated i.e. no new node
-                        if(attrs[i].nodeValue != obs_dictionary_entries[originalId][settings.currentLang]) {
-                          new_nodes[_nodeId] = attrs[i]
-                        }
-                    }
                   }
                 }
               }
