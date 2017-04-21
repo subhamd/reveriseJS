@@ -1,6 +1,5 @@
 import '../styles/main.scss'
 
-import walker from './modules/walker'
 import observer from './modules/observer'
 import { objForEach } from './modules/utils'
 import createService from './modules/services'
@@ -51,7 +50,7 @@ window.revlocalise.init = function( config ) {
     // temporary : to be removed
     setTimeout(() => {
       var div = document.createElement('div')
-      div.innerHTML = '<div title="This should get detected"><span>Hello Man</span><i>What is this?</i><a href="#">Link man!</a><a>I am king.</a></div>'
+      div.innerHTML = '<div title="This should get detected"><span>Hello Man</span><i>What is this?</i><a href="#">Link man!</a><a>I am king.</a><a>New node</a></div>'
       document.body.prepend(div)
     }, 5000)
 

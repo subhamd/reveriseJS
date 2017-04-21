@@ -14,8 +14,11 @@ export function dictKey() {
 /*
  Calculates a unique node is based on the position of the node in the DOM
 */
-let salt = null
+let salt = null,
+i = 0;
 export function nodeId(node) {
+  //console.log(i++)
+
   salt = (rec(node).trim() + '#' + node.textContent.trim()).trim()
 
   if(salt.indexOf('^') !== -1) return null

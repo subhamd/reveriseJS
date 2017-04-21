@@ -1,4 +1,3 @@
-import walker from './walker'
 import Promise from 'promise-polyfill'
 import { nodeId, dictKey } from './keygen'
 import { now, objForEach, make_error } from './utils'
@@ -19,19 +18,8 @@ function factory () {
       entries: response.published,
       ids: response.ids
     }
-
     // before setting check quota and delete old dictionaries if required
-
     setObject(dict_key, transformed_data)
-    makeInMemoryDictionary(transformed_data)
-  }
-
-  function makeInMemoryDictionary(data) {
-    walker(node => {
-      let id = nodeId(node)
-      if(data.entries[id]) data.entries[id].ref = node
-    })
-    dictionary = data
   }
 
   return {
@@ -62,7 +50,7 @@ function factory () {
             }
 
             else if(response.update_status === 'UPDATE_UNAVAILABLE') {
-              makeInMemoryDictionary(cached)
+              //makeInMemoryDictionary(cached)
               resolve({ data: dictionary, settings: getObject('__settings__') })
             }
 
