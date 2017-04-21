@@ -23,6 +23,32 @@ window.revlocalise = window.revlocalise || {}
 window.revlocalise.obs_dictionary = obs_dictionary
 //window.revlocalise.obs_dictionary_entries = obs_dictionary_entries
 
+function manualTranslate() {
+    let nodes = window.revlocalise.live_nodes.processed_nodes,
+      attrs = window.revlocalise.live_nodes.processed_attrs,
+      nodes_empty = Object.keys(nodes).length === 0,
+      attrs_empty = Object.keys(attrs).length === 0,
+      entries = obs_dictionary.entries;
+
+    nodeTreeWalker(document, n => {
+      let _nodeId = nodeId(n),
+          _absNodePos = absNodePos(n);
+      
+      if(entries[_nodeId]) {
+        let dest = n.nodeType === 2 ? attrs : nodes;
+        // add to processed nodes
+        dest[_absNodePos] = {
+          updatedOn: now(), 
+          originalId: _nodeId, 
+          lastUpdated: entries[_nodeId].lastUpdated, 
+          ref: n
+        }
+        // translate value 
+        n.nodeValue = entries[_nodeId][settings.currentLang]
+      }
+    })
+}
+
 
 // init method
 window.revlocalise.init = function( config ) {
@@ -48,7 +74,7 @@ window.revlocalise.init = function( config ) {
       // create the widget
       createWidget()
 
-      // if obs_dictionary does not exists, use the syn_dictionary
+      // put new values from syn_dictionary to obs_dictionary
       if(!obs_dictionary.entries) {
         obs_dictionary.entries = {}
         objForEach(syn_dictionary.entries, (value, key) => {
@@ -56,7 +82,7 @@ window.revlocalise.init = function( config ) {
         })
       }
       // patch update
-      if(obs_dictionary.lastUpdated && obs_dictionary.entries && ( syn_dictionary.lastUpdated > obs_dictionary.lastUpdated ) ) {
+      if(obs_dictionary.updatedOn && obs_dictionary.entries && ( syn_dictionary.updatedOn > obs_dictionary.updatedOn ) ) {
 
         // remove extra items from obs_dictionary
         objForEach(obs_dictionary.entries, ( value, key ) => {
@@ -72,6 +98,9 @@ window.revlocalise.init = function( config ) {
             obs_dictionary.entries[key] = syn_dictionary.entries[key]
           }
         })
+
+        // trigger manual translate, since update is available 
+        manualTranslate()
       }
 
       // when language is changed
@@ -98,24 +127,7 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
       nodes_empty = Object.keys(nodes).length === 0,
       attrs_empty = Object.keys(attrs).length === 0;
   
-  if( nodes_empty || attrs_empty)
-    nodeTreeWalker(document, n => {
-      let _nodeId = nodeId(n),
-          _nodeAbsPos = absNodePos(n);
-
-        if(attrs_empty && n.nodeType === 2 && window.revlocalise.obs_dictionary.entries) {
-          if(window.revlocalise.obs_dictionary.entries[_nodeId]) {
-            attrs[_nodeAbsPos] = { updatedOn: now(), originalId: _nodeId, ref: n }
-          }
-        }
-
-        if(nodes_empty && n.nodeType === 3 && window.revlocalise.obs_dictionary.entries) {
-          if(window.revlocalise.obs_dictionary.entries[_nodeId]) {
-            nodes[_nodeAbsPos] = { updatedOn: now(), originalId: _nodeId, ref: n }
-          }
-        }
-    })
-
+  if(nodes_empty || attrs_empty) manualTranslate()
 
   // change in already observerd nodes
   objForEach(nodes, val => {

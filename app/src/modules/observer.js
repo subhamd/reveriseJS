@@ -67,8 +67,13 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
         obs_dictionary_entries && 
         (n.nodeType === 3 || n.nodeType === 2) && 
         obs_dictionary_entries[_nId] ) {
-          processed_entities[_nPos]                   = { updatedOn: now(), originalId: _nId, ref: n }
-          obs_dictionary_entries[_nId].ref            = n
+          processed_entities[_nPos] = { 
+            updatedOn: now(), 
+            originalId: _nId, 
+            lastUpdated: obs_dictionary_entries[_nId].lastUpdated, 
+            ref: n 
+          }
+          obs_dictionary_entries[_nId].ref = n
           obs_dictionary_entries[_nId].ref.nodeValue  = obs_dictionary_entries[_nId][settings.currentLang]
       }
     }
