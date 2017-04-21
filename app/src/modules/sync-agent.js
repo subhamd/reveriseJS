@@ -1,4 +1,5 @@
 import Promise from 'promise-polyfill'
+import objectAssign from 'object-assign'
 import { nodeId, dictKey } from './keygen'
 import { now, objForEach, make_error } from './utils'
 import { storageInit, getObject, setObject, clearAll } from './storage-man'
@@ -20,6 +21,7 @@ function factory () {
     }
     // before setting check quota and delete old dictionaries if required
     setObject(dict_key, transformed_data)
+    dictionary = transformed_data
   }
 
   return {

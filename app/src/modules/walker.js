@@ -1,26 +1,22 @@
+let restrictedElements = ['SCRIPT', 'STYLE', 'OBJECT', 'EMBED'],
+      allowedAttrs    = ['placeholder', 'title']; // visible attributes 
+
+// filter allowed nodes 
+export function is_allowed(n) {
+  let allowed = true
+  
+  if(n.parentElement && restrictedElements.indexOf(n.parentElement.nodeName) != -1) return false
+  if(restrictedElements.indexOf(n.nodeName) !== -1) allowed = false
+  if(n.dataset && n.dataset.nolocalize) allowed = false
+
+  if( (n.nodeType === 2 || n.nodeType === 3) && n.nodeValue.trim() == '') return false
+  if(n.nodeType === 2 && allowedAttrs.indexOf(n.nodeName) === -1) return false
+
+  return allowed 
+}
 
 // traverses a node for all childr text/attribute nodes 
 export function nodeTreeWalker(node, cb) {
-
-  let restrictedNodes = ['SCRIPT', 'STYLE', 'OBJECT', 'EMBED'],
-      allowedAttrs    = ['placeholder', 'title']; // visible attributes 
-
-  // filter allowed nodes 
-  function is_allowed(n) {
-    let allowed = true
-    
-    // if element node 
-    if(n.nodeType === 1) {
-      if(restrictedNodes.indexOf(n.nodeName) !== -1) allowed = false
-      if(n.dataset.nolocalize) allowed = false
-    }
-
-    if( (n.nodeType === 2 || n.nodeType === 3) && n.nodeValue.trim() == '') return false
-    if(n.nodeType === 2 && allowedAttrs.indexOf(n.nodeName) === -1) return false
-
-    return allowed 
-  }
-
   // recursively traverse the tree 
   function rec(_node) {
     // check eligibility
@@ -39,7 +35,7 @@ export function nodeTreeWalker(node, cb) {
     }
     
     // process childrens 
-    _node.childNodes.forEach(n => rec(n))
+    _node.childNodes.forEach(n => is_allowed(n) && rec(n))
   }
 
   rec(node)

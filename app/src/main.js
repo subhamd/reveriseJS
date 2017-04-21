@@ -1,22 +1,19 @@
 import '../styles/main.scss'
 
 import observer from './modules/observer'
-import { objForEach } from './modules/utils'
 import createService from './modules/services'
+import { nodeTreeWalker } from './modules/walker'
+import { objForEach, now } from './modules/utils'
 import createSynchronizer from './modules/sync-agent'
 import { languages, available_langs } from './modules/langs'
-import { nodeId, nodePos, dictKey } from './modules/keygen'
 import { setObject, getObject } from './modules/storage-man'
+import { nodeId, nodePos, dictKey, absNodePos } from './modules/keygen'
 import createWidget, { setLanguageChangeHandler } from './modules/widget'
 
 // retrieve cached dictionary and settings
-let obs_dictionary = getObject(dictKey()),
-    settings = getObject('__settings__'),
-    obs_dictionary_entries = null,
+let obs_dictionary = getObject(dictKey()) || { entries: null },
+    settings = getObject('__settings__') || { currentLang: 'value' },
     translated_nodes = {};
-
-obs_dictionary && (obs_dictionary_entries = obs_dictionary.entries);
-settings || (settings = { currentLang: 'value' });
 
 
 // revlocalise instance
@@ -24,7 +21,7 @@ window.revlocalise = window.revlocalise || {}
 
 // expose the obs_dictionary as global
 window.revlocalise.obs_dictionary = obs_dictionary
-window.revlocalise.obs_dictionary_entries = obs_dictionary_entries
+//window.revlocalise.obs_dictionary_entries = obs_dictionary_entries
 
 
 // init method
@@ -40,45 +37,39 @@ window.revlocalise.init = function( config ) {
   })
 
   // start observing
-  window.revlocalise.live_nodes = observer(obs_dictionary_entries, settings, obs_dictionary.ids, service)
+  window.revlocalise.live_nodes = observer(obs_dictionary, settings, obs_dictionary.ids, service)
 
 
   window.onload = () => {
-    let sync = createSynchronizer()
-    
 
-    // temporary : to be removed
-    setTimeout(() => {
-      var div = document.createElement('div')
-      div.innerHTML = '<div title="This should get detected"><span>Hello Man</span><i>What is this?</i><a href="#">Link man!</a><a>I am king.</a><a>New node</a></div>'
-      document.body.prepend(div)
-    }, 5000)
+    let sync = createSynchronizer()
 
     sync.ensure( config, service ).then(({ data: syn_dictionary, settings }) => {
       // create the widget
       createWidget()
 
       // if obs_dictionary does not exists, use the syn_dictionary
-      if(!(obs_dictionary && obs_dictionary_entries)) {
+      if(!obs_dictionary.entries) {
+        obs_dictionary.entries = {}
         objForEach(syn_dictionary.entries, (value, key) => {
-          obs_dictionary_entries[key] = value
+          obs_dictionary.entries[key] = value
         })
       }
       // patch update
-      if(obs_dictionary && ( syn_dictionary.lastUpdated > obs_dictionary.lastUpdated ) ) {
+      if(obs_dictionary.lastUpdated && obs_dictionary.entries && ( syn_dictionary.lastUpdated > obs_dictionary.lastUpdated ) ) {
 
-        // remove extra items from obs dictionary
-        objForEach(obs_dictionary_entries, ( value, key ) => {
+        // remove extra items from obs_dictionary
+        objForEach(obs_dictionary.entries, ( value, key ) => {
           if(!syn_dictionary.entries[key]) {
-            obs_dictionary_entries[key].ref.nodeValue = obs_dictionary_entries[key].value
-            delete obs_dictionary_entries[key]
+            obs_dictionary.entries[key].ref.nodeValue = obs_dictionary.entries[key].value
+            delete obs_dictionary.entries[key]
           }
         })
         
-        // translate with updated synced dictionary
+        // assign syn_dictionary content to obs_dictionary 
         objForEach(syn_dictionary.entries, (value, key) => {
-          if(!obs_dictionary_entries[key]) {
-            obs_dictionary_entries[key] = syn_dictionary.entries[key]
+          if(!obs_dictionary.entries[key]) {
+            obs_dictionary.entries[key] = syn_dictionary.entries[key]
           }
         })
       }
@@ -87,6 +78,7 @@ window.revlocalise.init = function( config ) {
       setLanguageChangeHandler(lang => {
         revlocalise.setLanguage(lang, syn_dictionary)
       })
+
     })
   }
 }
@@ -102,19 +94,41 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
   setObject('__settings__', settings)
 
   let nodes = window.revlocalise.live_nodes.processed_nodes,
-      attrs = window.revlocalise.live_nodes.processed_attrs;
+      attrs = window.revlocalise.live_nodes.processed_attrs,
+      nodes_empty = Object.keys(nodes).length === 0,
+      attrs_empty = Object.keys(attrs).length === 0;
+  
+  if( nodes_empty || attrs_empty)
+    nodeTreeWalker(document, n => {
+      let _nodeId = nodeId(n),
+          _nodeAbsPos = absNodePos(n);
 
+        if(attrs_empty && n.nodeType === 2 && window.revlocalise.obs_dictionary.entries) {
+          if(window.revlocalise.obs_dictionary.entries[_nodeId]) {
+            attrs[_nodeAbsPos] = { updatedOn: now(), originalId: _nodeId, ref: n }
+          }
+        }
+
+        if(nodes_empty && n.nodeType === 3 && window.revlocalise.obs_dictionary.entries) {
+          if(window.revlocalise.obs_dictionary.entries[_nodeId]) {
+            nodes[_nodeAbsPos] = { updatedOn: now(), originalId: _nodeId, ref: n }
+          }
+        }
+    })
+
+
+  // change in already observerd nodes
   objForEach(nodes, val => {
-    if(window.revlocalise.obs_dictionary) {
-      val.ref.nodeValue = window.revlocalise.obs_dictionary_entries[val.originalId][settings.currentLang]
+    if(window.revlocalise.obs_dictionary.entries) {
+      val.ref.nodeValue = window.revlocalise.obs_dictionary.entries[val.originalId][settings.currentLang]
     }
     else if(syn_dictionary)
       val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]
   })
   
   objForEach(attrs, val => {
-    if(window.revlocalise.obs_dictionary) {
-      val.ref.nodeValue = window.revlocalise.obs_dictionary_entries[val.originalId][settings.currentLang]
+    if(window.revlocalise.obs_dictionary.entries) {
+      val.ref.nodeValue = window.revlocalise.obs_dictionary.entries[val.originalId][settings.currentLang]
     }
     else if(syn_dictionary)
       val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]

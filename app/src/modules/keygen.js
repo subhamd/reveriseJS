@@ -21,7 +21,7 @@ export function nodeId(node) {
 
   salt = (rec(node).trim() + '#' + node.textContent.trim()).trim()
 
-  if(salt.indexOf('^') !== -1) return null
+  if(salt.indexOf('^') !== -1) return false
 
   return md5.hash(salt)
 }
