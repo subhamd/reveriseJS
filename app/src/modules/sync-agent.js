@@ -55,13 +55,16 @@ function factory () {
               //makeInMemoryDictionary(cached)
               resolve({ data: dictionary, settings: getObject('__settings__') })
             }
-
-            else if(response.update_status === 'NODATA')
+            // when backend is empty
+            else if(response.update_status === 'NODATA') {
+              // first translate back to english 
+              window.revlocalise.setLanguage('english')
+              // then submit 
               service.submit().then(response => {
                 updateStorage(response)
                 resolve({ data: dictionary, settings: getObject('__settings__') })
               })
-
+            }
             else reject(make_error('Unknown error in file sync-agent'))
           })
         }

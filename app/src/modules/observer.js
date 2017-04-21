@@ -10,7 +10,8 @@ let observer            = null,
     submitted_node_ids  = null,
     processed_attrs     = {},
     processed_nodes     = {},
-    obs_dictionary_entries = null;
+    obs_dictionary_entries = null,
+    req_busy            = false;
 
 window.revlocalise = window.revlocalise || {}
 window.revlocalise.showNewNodes = function() { console.log(new_nodes) }
@@ -110,14 +111,17 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
   if(intervalId) clearInterval(intervalId)
   else {
     setInterval(() => {
-      
+
+      if(req_busy) return 
+
       let req_data = {
         url: normalizedLocation(),
         dict_key: dictKey(),
         data: {}
       },
+
       num_nodes = 0;
-      objForEach(new_nodes, node => {
+      objForEach(new_nodes, (node, key) => {
         let id = nodeId(node),
             pos = nodePos(node)
 
@@ -125,35 +129,38 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
         if(!id) return
         
         num_nodes++
-        req_data.data[id] = { id, value: node.textContent,
+        req_data.data[id] = {
+          id, 
+          value: node.nodeValue,
           url: normalizedLocation(),
           capture_url: location.href,
           nodePos: pos
         }
+
+        delete new_nodes[key]
       })
 
-      if(num_nodes > 0) {
-        console.log(new_nodes)
-        new_nodes = {}
-      }
       
-      // if(num_nodes > 0) {
-      //   console.log(new_nodes)
-      //   service.submit(req_data).then(response => {
-      //     new_nodes = {}
-      //     submitted_node_ids = response.ids //store the new ids 
+      if(num_nodes > 0) {
 
-      //     console.log("A set of new nodes were submitted.")
-      //     console.log(response)
-      //     // storage will be updated on next reload
-      //   })
-      //   .catch(err => {
-      //     console.log('Pushing new strings failed!')
-      //   })
-      // }
-      // else {
-      //   console.log("No new nodes discovered.")
-      // }
+        console.log("New nodes found.")
+        console.log(new_nodes)
+        
+        req_busy = true
+        // push new nodes to backend
+        service.submit(req_data).then(response => {
+          submitted_node_ids = response.ids //store the new ids 
+          req_busy = false
+        })
+        .catch(err => {
+          req_busy = false
+          console.log('Pushing new strings failed!')
+        })
+      }
+      else {
+        req_busy = false
+        console.log("No new nodes found.")
+      }
 
       // clear entries from processed nodes store which are not needed anymore
       // reason may be, unpublished from backend etc.
