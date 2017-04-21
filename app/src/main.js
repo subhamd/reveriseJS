@@ -87,7 +87,8 @@ window.revlocalise.init = function( config ) {
         // remove extra items from obs_dictionary
         objForEach(obs_dictionary.entries, ( value, key ) => {
           if(!syn_dictionary.entries[key]) {
-            obs_dictionary.entries[key].ref.nodeValue = obs_dictionary.entries[key].value
+            if(obs_dictionary.entries[key].ref)
+              obs_dictionary.entries[key].ref.nodeValue = obs_dictionary.entries[key].value
             delete obs_dictionary.entries[key]
           }
         })

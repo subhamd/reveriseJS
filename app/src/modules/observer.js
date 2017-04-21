@@ -155,6 +155,23 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
       //   console.log("No new nodes discovered.")
       // }
 
+      // clear entries from processed nodes store which are not needed anymore
+      // reason may be, unpublished from backend etc.
+      let cleared = 0
+      objForEach(processed_nodes, (value, key) => {
+        if(!obs_dictionary.entries[value.originalId]) {
+          cleared ++
+          delete processed_nodes[key]
+        }
+      })
+      objForEach(processed_attrs, (value, key) => {
+        if(!obs_dictionary.entries[value.originalId]) {
+          cleared ++
+          delete processed_attrs[key]
+        }
+      })
+      console.log(`Cleared ${cleared} entries from processed nodes store.`)
+
     }, 5000)
   }
 
