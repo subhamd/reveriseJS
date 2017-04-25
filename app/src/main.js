@@ -33,9 +33,10 @@ function manualTranslate() {
     nodeTreeWalker(document, n => {
       let _nodeId = nodeId(n),
           _absNodePos = absNodePos(n);
-      
+
       if(entries[_nodeId]) {
         let dest = n.nodeType === 2 ? attrs : nodes;
+
         // add to processed nodes
         dest[_absNodePos] = {
           updatedOn: now(), 
@@ -61,9 +62,9 @@ window.revlocalise.init = function( config ) {
       'Content-Type': 'application/json'
     }
   })
-
+  
   // start observing
-  window.revlocalise.live_nodes = observer(obs_dictionary, settings, obs_dictionary.ids, service)
+  window.revlocalise.live_nodes = observer(obs_dictionary, settings, service)
 
 
   window.onload = () => {

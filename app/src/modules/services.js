@@ -10,6 +10,7 @@ function factory(config) {
   return {
     // submit all data to the backend
     submit(data) {
+
       // request payload
       let req_data = {
         url: normalizedLocation(),

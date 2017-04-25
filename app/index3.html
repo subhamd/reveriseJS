@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Translation Widget</title>
+    <script src="/scripts/bundle.js"></script>
+    <script>
+      document.write('<meta name="google" value="notranslate">')
+      revlocalise.init({ apikey: 'DEV_API_KEY', appid: 'DEV_APP_ID' })
+    </script>
+  </head>
+  <body>
+    <div class="navbar-main background__peterriver">
+      <div class="navbar-main--segment">
+        <div class="navbar-main--item navbar-main--item__logo">
+          <h5 style="width:13em">
+            <a href="#">Indic Computing</a>
+          </h5>
+        </div>
+      </div>
+      <div class="navbar-main--segment navbar-main--segment__right">
+        <div class="navbar-main--item">
+          <a href="#">Home</a>
+        </div>
+        <div class="navbar-main--item">
+          <a href="#">About</a>
+        </div>
+        <div class="navbar-main--item">
+          <a href="#">Contact us</a>
+        </div>
+      </div>
+    </div>
+    <div class="page" id="page">
+      <div class="row">
+        <div class="span-l12">
+          <div class="info-block gradient__twitch">
+            <div class="info-block--icon">
+              <!-- <img src="images/vector-icons/calendar-regular.svg" /> -->
+            </div>
+            <p class="info-block--content">
+              A lot of Indic Computing projects are going on. They involve some government sector companies, some volunteer groups and individual people.
+            </p>
+            <div
+            class="info-block--secondary-content">
+              <a href="#" class="button button__light button__medium button__ghost">SUBSCRIBE</a>
+          </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- angular demo -->
+      <div class="row" ng-app="ang-demo" ng-controller="demoCtrl as ctrl">
+        <div class="span-l4" ng-repeat="item in ctrl.items">
+          <div class="card background__peterriver">
+            <figure class="card--thumb">
+              <a href="#">
+                <img ng-src={{item.src}} />
+              </a>
+            </figure>
+            <div class="card--content">
+              <h2 class="card--content--header">
+                <a href="#">{{item.header}}</a>
+              </h2>
+              <p class="card--content--mixed" style="color:white">
+                {{item.body}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" title="Some random text">
+        <div class="span-l6">
+          <div class="panel background__peterriver">
+            <div class="panel--header">Defination</div>
+            <div class="panel--content">
+              <p>
+                Indic Computing means "computing in Indic" i.e. Indian Scripts and Languages. It involves developing software in Indic Scripts/languages, Input methods, Localization of computer applications, web development, Database Management, Spell checkers, Speech to Text and Text to Speech applications and OCR in Indian languages.
+                Most of the Indic scripts nowadays use Unicode for working on Computers and Internet. In Unicode 5.0, Bengali, Devanagari, Gujarati, Gurmukhi, Kannada, Limbu, Malayalam, Oriya, Sinhala, Syloti Nagri, Tamil and Telugu scripts are encoded. Some more Indic scripts are in development and will be included in unicode, for instance Tulu Script.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="span-l6">
+          <form class="form">
+            <div class="row">
+              <div class="span-l12">
+                <div class="form--field__static">
+                  <h5>Signup form</h5>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="span-l12">
+                <div class="form--field">
+                  <label for="sample_input_1">Enter username</label>
+                  <input type="text" name="sample_input_1" placeholder="username" />
+                </div>
+                <div class="form--field">
+                  <label for="sample_input_2">Enter password</label>
+                  <input type="password" name="sample_input_2" placeholder="password" />
+                </div>
+                <div class="form--field">
+                  <div class="form--field--toggle-input">
+                    <input type="checkbox" id="remember_1" />
+                    <label for="remember_1">Remember me</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="span-l12">
+          <p>This string is added later</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span-l12">
+          <p>This string is added later</p>
+        </div>
+      </div>
+    </div>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js"></script>
+    <script>
+      angular.module('ang-demo', [])
+      .controller('demoCtrl', function() {
+       this.items = [{
+          header: 'Birds in North America and Europe Are Quickly Packing Their Bags',
+          body: 'Decades of data show that climate change is manipulating the way species move across continents.',
+          src: 'http://d2fbmjy3x0sdua.cloudfront.net/sites/default/files/styles/engagement_card/public/sfw_apa_2013_28342_232388_briankushner_blue_jay_kk_high.jpg?itok=ttMfUhUu'
+        },
+        {
+          header: 'Bird Dream Symbolism',
+          body: 'Freud thought that the bird represented the phallus and that flying represented the sexual act. Although in many countries the word ‘bird’ means a girl or woman, in Italy it means the male organ.',
+          src: 'http://weknownyourdreamz.com/images/birds/birds-01.jpg',
+        },
+        {
+          header: 'bird breeds',
+          body: 'spread your wings with an easy-to-care-for &amp; social family pet.',
+          src: 'http://s7d2.scene7.com/is/image/PetSmart/ARFEAT-CaringForYourBird-20160818?$CL0601$'
+        }];
+
+      })
+    </script>
+  </body>
+</html>

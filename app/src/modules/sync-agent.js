@@ -14,7 +14,6 @@ function factory () {
   function updateStorage( response ) {
 
     let transformed_data = {
-      createdOn: now(),
       updatedOn: response.updatedOn,  // => local creation time
       entries: response.published,
       ids: response.ids
@@ -49,14 +48,15 @@ function factory () {
             if(response.update_status === 'UPDATE_AVAILABLE') {
               updateStorage(response)
               resolve({ data: dictionary, settings: getObject('__settings__') })
+              return
             }
 
-            else if(response.update_status === 'UPDATE_UNAVAILABLE') {
-              //makeInMemoryDictionary(cached)
+            if(response.update_status === 'UPDATE_UNAVAILABLE') {
               resolve({ data: dictionary, settings: getObject('__settings__') })
+              return
             }
             // when backend is empty
-            else if(response.update_status === 'NODATA') {
+            if(response.update_status === 'NODATA') {
               // first translate back to english 
               window.revlocalise.setLanguage('english')
               // then submit 
@@ -64,8 +64,10 @@ function factory () {
                 updateStorage(response)
                 resolve({ data: dictionary, settings: getObject('__settings__') })
               })
+              return
             }
-            else reject(make_error('Unknown error in file sync-agent'))
+            
+            reject(make_error('Unknown error in file sync-agent'))
           })
         }
 

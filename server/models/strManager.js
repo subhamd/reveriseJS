@@ -52,12 +52,12 @@ export default function strManagerFactory() {
 
           // update the input dict
           new_string_entries.forEach(entry => dict.entries.push(entry))
-          return dict
+          return { dict, new_string_entries }
         })
     }
 
     // if no new strings added return original document back
-    return Promise.resolve(dict)
+    return Promise.resolve({ dict, new_string_entries })
   }
 
   /* The public interface */
@@ -140,9 +140,12 @@ export default function strManagerFactory() {
       })
 
       //[6] ==> write the dictionary to database
-      .then(updated_dict => {
-        console.log("Writting translated dictionary to the DB.")
-        return db.collection('STRINGS').update({ id: dict_key }, { $set: { 'entries': updated_dict.entries, '__meta__.lastUpdated': now() } })
+      .then(({ dict : updated_dict, new_string_entries }) => {
+        if(new_string_entries.length) {
+          console.log("Writting translated dictionary to the DB.")
+          return db.collection('STRINGS').update({ id: dict_key }, { $set: { 'entries': updated_dict.entries, '__meta__.lastUpdated': now() } })
+        }
+        return true
       })
     },
 

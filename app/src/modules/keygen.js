@@ -16,10 +16,10 @@ export function dictKey() {
 */
 let salt = null,
 i = 0;
-export function nodeId(node) {
+export function nodeId(node, content) {
   //console.log(i++)
 
-  salt = (rec(node).trim() + '#' + node.textContent.trim()).trim()
+  salt = (rec(node).trim() + '#' + content || node.textContent.trim()).trim()
 
   if(salt.indexOf('^') !== -1) return false
 

@@ -4,6 +4,8 @@ import dbc from './db'
 import strManagerFactory from './models/strManager'
 import { objForEach, _g, _m } from './utils'
 
+let busyApps = {}
+
 export default function makeRoutes(app) {
 
   // configure express app
@@ -74,6 +76,13 @@ export default function makeRoutes(app) {
         appid = req.headers['rev-app-id'],
         __appid = appid.replace('.', '~')
 
+    if(busyApps[__appid]) {
+      res.json({ success: false, msg: 'Busy serving previous request' })
+      return
+    }
+    
+    busyApps[__appid] = true
+
     // validate app
     dbc.connect().then(db => {
       return db.collection('APPS').findOne({ id: __appid, apikey })
@@ -86,6 +95,7 @@ export default function makeRoutes(app) {
       strManager.syncDictionary(doc.apikey, doc.id, req.body)
       .then(() => strManager.getAllEntries(req.body.dict_key))
       .then(published => {
+        delete busyApps[__appid]
         // < to-do: remove history from result >
         res.json({
           success: true,
@@ -94,6 +104,7 @@ export default function makeRoutes(app) {
         })
       })
       .catch(err => {
+        delete busyApps[__appid]
         console.log(err)
         res.json({ success: false, msg: 'Something went wrong at backend' })
       })

@@ -22,10 +22,10 @@ window.revlocalise.showProcessedNodes = function() {
 let scanned_elements = {}
 
 // mutation observer
-export default function (obs_dictionary, settings, _submitted_node_ids, service) {
+export default function (obs_dictionary, settings, service) {
   let attribs = ['placeholder', 'title']
 
-  submitted_node_ids = _submitted_node_ids
+  submitted_node_ids = obs_dictionary.ids
   obs_dictionary_entries = obs_dictionary.entries
 
   // if called multiple times, stop the previous observer
@@ -40,11 +40,8 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
 
     // if this node is already translated before 
     if(
-      obs_dictionary_entries &&
-      processed_entities[_nPos] &&
-      obs_dictionary_entries[processed_entities[_nPos].originalId][settings.currentLang] === n.nodeValue ) {
-      // console.log("Rejected the node: " + _nPos + " current value : " + obs_dictionary_entries[processed_entities[_nPos].originalId][settings.currentLang] + 
-      //   " original value : " + n.nodeValue)
+      n.__revloc__
+      ) {
       return;
     }
     
@@ -56,26 +53,28 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
 
       // detect new node
       if(
-        submitted_node_ids          && 
         n.nodeValue.trim() !== ""   &&
+        submitted_node_ids          &&
         !submitted_node_ids[_nId]   &&
-        !processed_entities[_nPos]  &&
-        (n.nodeType === 3 || n.nodeType === 2) ) {
+        !processed_entities[_nPos]) {
         new_nodes[_nId] = n
       }
 
       if(
         obs_dictionary_entries && 
-        (n.nodeType === 3 || n.nodeType === 2) && 
-        obs_dictionary_entries[_nId] ) {
+        obs_dictionary_entries[_nId] &&
+        (n.nodeType === 3 || n.nodeType === 2)
+        ) {
+        if(n.nodeType === 2) console.dir(n)
           processed_entities[_nPos] = { 
             updatedOn: now(), 
             originalId: _nId, 
             lastUpdated: obs_dictionary_entries[_nId].lastUpdated, 
-            ref: n 
+            ref: n
           }
           obs_dictionary_entries[_nId].ref = n
           obs_dictionary_entries[_nId].ref.nodeValue  = obs_dictionary_entries[_nId][settings.currentLang]
+          obs_dictionary_entries[_nId].ref.__revloc__ = { originalValue: obs_dictionary_entries[_nId].value }
       }
     }
 
@@ -111,55 +110,65 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
   if(intervalId) clearInterval(intervalId)
   else {
     setInterval(() => {
-
-      if(req_busy) return 
-
+      if(req_busy) return // waiting for oingoing request
+      
+      // request payload structure
       let req_data = {
         url: normalizedLocation(),
         dict_key: dictKey(),
         data: {}
-      },
-
-      num_nodes = 0;
+      }, num_nodes = 0;
+      
+      // for each new node 
       objForEach(new_nodes, (node, key) => {
+        
+        if(node.__revloc__) {
+          delete new_nodes[key]
+          return
+        }
+        else {
+          node.__revloc__ = { originalId: key, originalValue: node.nodeValue }
+        }
+
         let id = nodeId(node),
             pos = nodePos(node)
 
         // this check will remove any nodes that has become orphan by now 
-        if(!id) return
-        
-        num_nodes++
-        req_data.data[id] = {
-          id, 
-          value: node.nodeValue,
-          url: normalizedLocation(),
-          capture_url: location.href,
-          nodePos: pos
-        }
+        if(!id || submitted_node_ids[id]) return
 
+        // track count of new nodes  
+        num_nodes++;
+        req_data.data[ id ] = { // push entries in the data key
+          id          : id,
+          value       : node.nodeValue,
+          url         : normalizedLocation(),
+          capture_url : location.href,
+          nodePos     : pos
+        }
+        
+        // delete the entry from the new_nodes map
         delete new_nodes[key]
       })
 
-      
+      // if number of nodes is zero then 
       if(num_nodes > 0) {
-
-        console.log("New nodes found.")
-        console.log(new_nodes)
+        //console.log('New nodes found : ', new_nodes)
         
-        req_busy = true
+        req_busy = true // enter busy state
+
         // push new nodes to backend
         service.submit(req_data).then(response => {
           submitted_node_ids = response.ids //store the new ids 
-          req_busy = false
+          req_busy = false // exit busy state 
         })
         .catch(err => {
-          req_busy = false
-          console.log('Pushing new strings failed!')
+          req_busy = false // exit busy state 
+          console.log('Pushing new strings to server failed!')
         })
       }
       else {
-        req_busy = false
-        console.log("No new nodes found.")
+        req_busy = false // exit busy state 
+        //console.log("No new nodes found!")
       }
 
       // clear entries from processed nodes store which are not needed anymore
@@ -177,7 +186,7 @@ export default function (obs_dictionary, settings, _submitted_node_ids, service)
           delete processed_attrs[key]
         }
       })
-      console.log(`Cleared ${cleared} entries from processed nodes store.`)
+      //console.log(`Cleared ${cleared} entries from processed nodes store.`)
 
     }, 5000)
   }
