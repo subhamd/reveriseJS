@@ -29,21 +29,8 @@ function factory () {
       let cached = getObject(dict_key)
 
       return new Promise((resolve, reject) => {
-        if(!cached) {
-          service.submit().then(response => {
-            if(response.success) {
-              updateStorage(response)
-              resolve({ data: dictionary, settings: getObject('__settings__') })
-            }
-            else {
-              clearAll() // => clear localStorage
-              reject("Could not submit data.")
-            }
-          })
-        }
-        else {
           // validate if the cache is up to date
-          service.checkUpdate(dict_key, cached.updatedOn).then(response => {
+          service.checkUpdate(dict_key, (cached && cached.updatedOn) || 0).then(response => {
 
             if(response.update_status === 'UPDATE_AVAILABLE') {
               updateStorage(response)
@@ -59,17 +46,14 @@ function factory () {
             if(response.update_status === 'NODATA') {
               // first translate back to english 
               window.revlocalise.setLanguage('english')
-              // then submit 
-              service.submit().then(response => {
-                updateStorage(response)
-                resolve({ data: dictionary, settings: getObject('__settings__') })
-              })
+              Object.keys(localStorage).filter(a => a !== '__settings__').forEach(key => localStorage.removeItem(key))
+              resolve({ data: {}, settings: getObject('__settings__') })
               return
             }
             
             reject(make_error('Unknown error in file sync-agent'))
           })
-        }
+
 
       })
     }

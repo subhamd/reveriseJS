@@ -11,78 +11,53 @@ let observer            = null,
     processed_attrs     = {},
     processed_nodes     = {},
     obs_dictionary_entries = null,
+    node_id_map         = {},
     req_busy            = false;
 
 window.revlocalise = window.revlocalise || {}
-window.revlocalise.showNewNodes = function() { console.log(new_nodes) }
-window.revlocalise.showProcessedNodes = function() { 
-  console.log({ ...processed_nodes, ...processed_attrs })
-}
-
-let scanned_elements = {}
 
 // mutation observer
 export default function (obs_dictionary, settings, service) {
+
   let attribs = ['placeholder', 'title']
 
-  submitted_node_ids = obs_dictionary.ids
-  obs_dictionary_entries = obs_dictionary.entries
+  if(!obs_dictionary.ids) obs_dictionary.ids = []
+  if(!obs_dictionary.entries) obs_dictionary.entries = {}
+
+  submitted_node_ids      = obs_dictionary.ids
+  obs_dictionary_entries  = obs_dictionary.entries
 
   // if called multiple times, stop the previous observer
   if(observer) observer.disconnect()
 
   function mutateNode(n) {
-    let _nPos = absNodePos(n),
-        _nId  = null,
-        processed_entities = n.nodeType === 3 ? 
-                             processed_nodes : 
-                             processed_attrs;
-
-    // if this node is already translated before 
-    if(
-      n.__revloc__
-      ) {
-      return;
-    }
-    
     // only text and attribute nodes to be processed 
     if(n.nodeType === 3 || n.nodeType === 2) {
-      // calculate node id 
-      _nId = nodeId(n)
-      if(!_nId) return //must be invalid or user rejected node 
 
-      // detect new node
-      if(
-        n.nodeValue.trim() !== ""   &&
-        submitted_node_ids          &&
-        !submitted_node_ids[_nId]   &&
-        !processed_entities[_nPos]) {
-        new_nodes[_nId] = n
+      let _nPos = absNodePos(n),
+          _nId  = (n.__revloc__) ? nodeId(n, n.__revloc__.value): nodeId(n),
+          processed_entities = n.nodeType === 3 ? processed_nodes : processed_attrs;
+
+      // check if this node was processed before 
+      if(!_nId && n.nodeValue.trim() === "") return
+      else {
+          if(!n.__revloc__)
+            n.__revloc__ = { 
+              value: n.nodeValue,
+              is_new: (submitted_node_ids && submitted_node_ids[_nId]) ? false : true
+            }
+          else n.__revloc__.is_new = (submitted_node_ids && submitted_node_ids[_nId]) ? false : true
+
+          processed_entities[_nPos] = { ref: n, id: _nId }
+          if(obs_dictionary_entries && obs_dictionary_entries[_nId])
+            n.nodeValue = obs_dictionary_entries[_nId][settings.currentLang]
+        }
       }
 
-      if(
-        obs_dictionary_entries && 
-        obs_dictionary_entries[_nId] &&
-        (n.nodeType === 3 || n.nodeType === 2)
-        ) {
-        if(n.nodeType === 2) console.dir(n)
-          processed_entities[_nPos] = { 
-            updatedOn: now(), 
-            originalId: _nId, 
-            lastUpdated: obs_dictionary_entries[_nId].lastUpdated, 
-            ref: n
-          }
-          obs_dictionary_entries[_nId].ref = n
-          obs_dictionary_entries[_nId].ref.nodeValue  = obs_dictionary_entries[_nId][settings.currentLang]
-          obs_dictionary_entries[_nId].ref.__revloc__ = { originalValue: obs_dictionary_entries[_nId].value }
-      }
     }
-
-  }
 
   // install mutation observer
   observer = new MutationObserver( mutations => {
-
     mutations.forEach( mutation => {
       // handle newly inserted nodes
       if(mutation.type === 'childList') {
@@ -96,103 +71,99 @@ export default function (obs_dictionary, settings, service) {
     })
   })
 
+  setInterval(() => {
+
+    if(!submitted_node_ids || req_busy) return
+
+    let new_nodes = [],
+        num_nodes = 0,
+        req_body = {
+          url: normalizedLocation(),
+          dict_key: dictKey(),
+          data: {}
+        }
+
+    // get all the new nodes 
+    objForEach(processed_nodes, (val, key) => {
+      if(val.ref.__revloc__.is_new) {
+          val.ref.__revloc__.is_new = false
+          
+          let _id = nodeId(val.ref, val.ref.__revloc__.value),
+            _pos = nodePos(val.ref);
+
+          if(!_id || val.ref.nodeValue.trim() === '' || val.ref.parentElement == null || submitted_node_ids[_id]) 
+            return
+
+          num_nodes++
+
+          req_body.data[_id] = {
+            id: _id,
+            value: val.ref.__revloc__.value, // always send english text 
+            url: normalizedLocation(),
+            capture_url: location.href,
+            nodePos: _pos
+          }
+        }
+    })
+
+    // get all the new attributes 
+    // objForEach(processed_attrs, (val, key) => {
+    //   if(val.ref.__revloc__.is_new) {
+    //       val.ref.__revloc__.is_new = false
+          
+    //       let _id = nodeId(val.ref, val.ref.__revloc__.value),
+    //         _pos = nodePos(val.ref);
+
+    //       if(!_id || 
+    //         val.ref.nodeValue.trim() === '' || 
+    //         val.ref.ownerElement == null || // attributes have ownerElement set
+    //         submitted_node_ids[_id]) 
+    //         return
+
+    //       num_nodes++
+
+    //       req_body.data[_id] = {
+    //         id: _id,
+    //         value: val.ref.__revloc__.value, // always send english text 
+    //         url: normalizedLocation(),
+    //         capture_url: location.href,
+    //         nodePos: _pos
+    //       }
+    //     }
+    // })
+
+    if(num_nodes > 0) {
+      req_busy = true // enter busy state 
+      service.submit(req_body)
+      .then(d => {
+        obs_dictionary.entries = obs_dictionary_entries = d.published
+        obs_dictionary.ids = submitted_node_ids = d.ids
+        req_busy = false // exit busy state 
+      })
+      .catch(err => {
+        console.log(err)
+        req_busy = false // exit busy state 
+      })
+    }
+  }, 5000)
+  
+
+
   // start observing
   observer.observe(document, {
-    attributes: true,
     childList: true,
-    subtree: true,
-    attributeFilter: attribs,
-    attributeOldValue: true
+    subtree: true
   });
-
-  
-  // push new nodes to backend at regular interval
-  if(intervalId) clearInterval(intervalId)
-  else {
-    setInterval(() => {
-      if(req_busy) return // waiting for oingoing request
-      
-      // request payload structure
-      let req_data = {
-        url: normalizedLocation(),
-        dict_key: dictKey(),
-        data: {}
-      }, num_nodes = 0;
-      
-      // for each new node 
-      objForEach(new_nodes, (node, key) => {
-        
-        if(node.__revloc__) {
-          delete new_nodes[key]
-          return
-        }
-        else {
-          node.__revloc__ = { originalId: key, originalValue: node.nodeValue }
-        }
-
-        let id = nodeId(node),
-            pos = nodePos(node)
-
-        // this check will remove any nodes that has become orphan by now 
-        if(!id || submitted_node_ids[id]) return
-
-        // track count of new nodes  
-        num_nodes++;
-        req_data.data[ id ] = { // push entries in the data key
-          id          : id,
-          value       : node.nodeValue,
-          url         : normalizedLocation(),
-          capture_url : location.href,
-          nodePos     : pos
-        }
-        
-        // delete the entry from the new_nodes map
-        delete new_nodes[key]
-      })
-
-      // if number of nodes is zero then 
-      if(num_nodes > 0) {
-        //console.log('New nodes found : ', new_nodes)
-        
-        req_busy = true // enter busy state
-
-        // push new nodes to backend
-        service.submit(req_data).then(response => {
-          submitted_node_ids = response.ids //store the new ids 
-          req_busy = false // exit busy state 
-        })
-        .catch(err => {
-          req_busy = false // exit busy state 
-          console.log('Pushing new strings to server failed!')
-        })
-      }
-      else {
-        req_busy = false // exit busy state 
-        //console.log("No new nodes found!")
-      }
-
-      // clear entries from processed nodes store which are not needed anymore
-      // reason may be, unpublished from backend etc.
-      let cleared = 0
-      objForEach(processed_nodes, (value, key) => {
-        if(!obs_dictionary.entries[value.originalId]) {
-          cleared ++
-          delete processed_nodes[key]
-        }
-      })
-      objForEach(processed_attrs, (value, key) => {
-        if(!obs_dictionary.entries[value.originalId]) {
-          cleared ++
-          delete processed_attrs[key]
-        }
-      })
-      //console.log(`Cleared ${cleared} entries from processed nodes store.`)
-
-    }, 5000)
-  }
 
   return {
     processed_nodes,
     processed_attrs
   }
+}
+
+
+// temporary debugging helpers
+window.revlocalise.showNewNodes = function() { console.log(new_nodes) }
+window.revlocalise.showProcessedNodes = function() { 
+  console.log({ ...processed_nodes, ...processed_attrs })
 }

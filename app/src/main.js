@@ -11,7 +11,7 @@ import { nodeId, nodePos, dictKey, absNodePos } from './modules/keygen'
 import createWidget, { setLanguageChangeHandler } from './modules/widget'
 
 // retrieve cached dictionary and settings
-let obs_dictionary = getObject(dictKey()) || { entries: null },
+let obs_dictionary = getObject(dictKey()) || { entries: null, ids: [] },
     settings = getObject('__settings__') || { currentLang: 'value' },
     translated_nodes = {};
 
@@ -72,44 +72,11 @@ window.revlocalise.init = function( config ) {
     let sync = createSynchronizer()
 
     sync.ensure( config, service ).then(({ data: syn_dictionary, settings }) => {
-      // create the widget
-      createWidget()
-
-      // put new values from syn_dictionary to obs_dictionary
-      if(!obs_dictionary.entries) {
-        obs_dictionary.entries = {}
-        objForEach(syn_dictionary.entries, (value, key) => {
-          obs_dictionary.entries[key] = value
-        })
-      }
-      // patch update
-      if(obs_dictionary.updatedOn && obs_dictionary.entries && ( syn_dictionary.updatedOn > obs_dictionary.updatedOn ) ) {
-
-        // remove extra items from obs_dictionary
-        objForEach(obs_dictionary.entries, ( value, key ) => {
-          if(!syn_dictionary.entries[key]) {
-            if(obs_dictionary.entries[key].ref)
-              obs_dictionary.entries[key].ref.nodeValue = obs_dictionary.entries[key].value
-            delete obs_dictionary.entries[key]
-          }
-        })
-        
-        // assign syn_dictionary content to obs_dictionary 
-        objForEach(syn_dictionary.entries, (value, key) => {
-          if(!obs_dictionary.entries[key]) {
-            obs_dictionary.entries[key] = syn_dictionary.entries[key]
-          }
-        })
-
-        // trigger manual translate, since update is available 
-        manualTranslate()
-      }
-
+      createWidget() // create the widget
       // when language is changed
       setLanguageChangeHandler(lang => {
         revlocalise.setLanguage(lang, syn_dictionary)
       })
-
     })
   }
 }
@@ -119,7 +86,8 @@ window.revlocalise.init = function( config ) {
 // change translation language
 window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
 
-  if(available_langs.indexOf(lang) == -1) return false
+  if(available_langs.indexOf(lang) == -1 || window.revlocalise.obs_dictionary.entries == null) 
+    return false
 
   settings.currentLang = lang == 'english' ? 'value' : lang
   setObject('__settings__', settings)
@@ -127,26 +95,18 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
   let nodes = window.revlocalise.live_nodes.processed_nodes,
       attrs = window.revlocalise.live_nodes.processed_attrs,
       nodes_empty = Object.keys(nodes).length === 0,
-      attrs_empty = Object.keys(attrs).length === 0;
+      attrs_empty = Object.keys(attrs).length === 0,
+      entries = window.revlocalise.obs_dictionary.entries;
   
   if(nodes_empty || attrs_empty) manualTranslate()
 
-  // change in already observerd nodes
-  objForEach(nodes, val => {
-    if(window.revlocalise.obs_dictionary.entries) {
-      val.ref.nodeValue = window.revlocalise.obs_dictionary.entries[val.originalId][settings.currentLang]
+  objForEach(nodes, (val, key) => {
+    let id = nodeId(val.ref, val.ref.__revloc__.value)
+    if(entries[id] &&  val.ref.__revloc__) {
+      val.ref.nodeValue = entries[id][settings.currentLang]
     }
-    else if(syn_dictionary)
-      val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]
   })
   
-  objForEach(attrs, val => {
-    if(window.revlocalise.obs_dictionary.entries) {
-      val.ref.nodeValue = window.revlocalise.obs_dictionary.entries[val.originalId][settings.currentLang]
-    }
-    else if(syn_dictionary)
-      val.ref.nodeValue = syn_dictionary[val.originalId][settings.currentLang]
-  })
 
   if(!syn_dictionary) setLanguageChangeHandler(lang)
 }

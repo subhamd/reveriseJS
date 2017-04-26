@@ -17,9 +17,9 @@ export function dictKey() {
 let salt = null,
 i = 0;
 export function nodeId(node, content) {
-  //console.log(i++)
+  console.log(i++)
 
-  salt = (rec(node).trim() + '#' + content || node.textContent.trim()).trim()
+  salt = (rec(node).trim() + '#' + (content || node.nodeValue.trim())).trim()
 
   if(salt.indexOf('^') !== -1) return false
 
