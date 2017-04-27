@@ -36,6 +36,12 @@ export function nodeTreeWalker(node, cb) {
     
     // process childrens 
     _node.childNodes.forEach(n => is_allowed(n) && rec(n))
+
+    // process attributes 
+    if(_node.attributes)
+    for(let i = 0; i < _node.attributes.length ; i++) {
+      if(allowedAttrs.indexOf(_node.attributes[i].nodeName.toLowerCase()) !== -1) rec(_node.attributes[i])
+    }
   }
 
   rec(node)

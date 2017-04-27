@@ -44,6 +44,7 @@ export default function (obs_dictionary, settings, service) {
           if(!n.__revloc__)
             n.__revloc__ = { 
               value: n.nodeValue,
+              __temp__: null,
               is_new: (submitted_node_ids && submitted_node_ids[_nId]) ? false : true
             }
           else n.__revloc__.is_new = (submitted_node_ids && submitted_node_ids[_nId]) ? false : true
@@ -107,30 +108,30 @@ export default function (obs_dictionary, settings, service) {
     })
 
     // get all the new attributes 
-    // objForEach(processed_attrs, (val, key) => {
-    //   if(val.ref.__revloc__.is_new) {
-    //       val.ref.__revloc__.is_new = false
+    objForEach(processed_attrs, (val, key) => {
+      if(val.ref.__revloc__.is_new) {
+          val.ref.__revloc__.is_new = false
           
-    //       let _id = nodeId(val.ref, val.ref.__revloc__.value),
-    //         _pos = nodePos(val.ref);
+          let _id = nodeId(val.ref, val.ref.__revloc__.value),
+            _pos = nodePos(val.ref);
 
-    //       if(!_id || 
-    //         val.ref.nodeValue.trim() === '' || 
-    //         val.ref.ownerElement == null || // attributes have ownerElement set
-    //         submitted_node_ids[_id]) 
-    //         return
+          if(!_id || 
+            val.ref.nodeValue.trim() === '' || 
+            val.ref.ownerElement == null || // attributes have ownerElement set
+            submitted_node_ids[_id]) 
+            return
 
-    //       num_nodes++
+          num_nodes++
 
-    //       req_body.data[_id] = {
-    //         id: _id,
-    //         value: val.ref.__revloc__.value, // always send english text 
-    //         url: normalizedLocation(),
-    //         capture_url: location.href,
-    //         nodePos: _pos
-    //       }
-    //     }
-    // })
+          req_body.data[_id] = {
+            id: _id,
+            value: val.ref.__revloc__.value, // always send english text 
+            url: normalizedLocation(),
+            capture_url: location.href,
+            nodePos: _pos
+          }
+        }
+    })
 
     if(num_nodes > 0) {
       req_busy = true // enter busy state 
@@ -164,6 +165,11 @@ export default function (obs_dictionary, settings, service) {
 
 // temporary debugging helpers
 window.revlocalise.showNewNodes = function() { console.log(new_nodes) }
-window.revlocalise.showProcessedNodes = function() { 
-  console.log({ ...processed_nodes, ...processed_attrs })
+window.revlocalise.getProcessedNodes = function() { 
+  let arr = []
+  objForEach({...processed_nodes, ...processed_attrs}, (v, k) => {
+    v.selector = k
+    arr.push(v)
+  })
+  return arr
 }

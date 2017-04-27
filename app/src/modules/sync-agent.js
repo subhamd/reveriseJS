@@ -46,7 +46,10 @@ function factory () {
             if(response.update_status === 'NODATA') {
               // first translate back to english 
               window.revlocalise.setLanguage('english')
-              Object.keys(localStorage).filter(a => a !== '__settings__').forEach(key => localStorage.removeItem(key))
+              
+              // clear this dictionary 
+              localStorage.removeItem(dict_key)
+              
               resolve({ data: {}, settings: getObject('__settings__') })
               return
             }
