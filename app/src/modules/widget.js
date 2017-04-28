@@ -24,6 +24,7 @@ const widgetHTML =
       <li data-lang="hindi"><a href="#hindi" data-nolocalize="true">Hindi</a></li>
 	<li data-lang="punjabi"><a href="#punjabi" data-nolocalize="true">Punjabi</a></li>
       <li data-lang="kannada"><a href="#kannada" data-nolocalize="true">Kannada</a></li>
+      <li data-lang="tamil"><a href="#Tamil" data-nolocalize="true">Tamil</a></li>
       <li data-lang="telugu"><a href="#telugu" data-nolocalize="true">Telugu</a></li>
     </ul>
   </li>

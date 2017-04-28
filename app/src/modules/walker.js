@@ -12,12 +12,12 @@ export function is_allowed(n) {
   if( (n.nodeType === 2 || n.nodeType === 3) && n.nodeValue.trim() == '') return false
   if(n.nodeType === 2 && allowedAttrs.indexOf(n.nodeName) === -1) return false
 
-  return allowed 
+  return allowed
 }
 
-// traverses a node for all childr text/attribute nodes 
+// traverses a node for all childr text/attribute nodes
 export function nodeTreeWalker(node, cb) {
-  // recursively traverse the tree 
+  // recursively traverse the tree
   function rec(_node) {
     // check eligibility
     if(is_allowed(_node)) {

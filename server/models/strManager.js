@@ -9,7 +9,7 @@ import { _m, _g, objForEach, now } from '../utils'
 export default function strManagerFactory() {
 
   let _langs = ['hindi', 'bengali', 'assamese', 'gujarati', 'kannada', 'marathi', 'malayalam', 'odia', 'telugu', 'tamil', 'punjabi'],
-      _availableLang = ['hindi', 'punjabi', 'kannada', 'telugu']
+      _availableLang = ['hindi', 'punjabi', 'kannada', 'telugu', 'tamil']
 
   // apply translation to a document
   function applyTranslation(dict, new_data) {
