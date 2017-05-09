@@ -10,7 +10,7 @@ function translate(entries, target_lang) {
       chunks = [],
       idchunks = [],
       i = 0, //index
-      c = 50, //chunk size
+      c = 10, //chunk size
       m = Number.parseInt(source_strings.length / c) //num chunk
 
   // break the data into chunks
@@ -34,13 +34,13 @@ function translate(entries, target_lang) {
       })
       .send(JSON.stringify({ data: chunks[index] } ))
       .end(response => {
-        if(!response.body) console.log(response)
-        if(response.body && !response.body.responseList) {
+        console.log(response.body)
+        // if(!response.body) console.log(response)
+        // if(response.body && !response.body.responseList) {
           // to write the response json to file
           //fs.writeFileSync(`response${index}.json`, JSON.stringify(response))
-          console.log(response)
-        }
-
+          //console.log(response)
+        //}
         let responseBody = response.body
         resolve(responseBody.responseList.map((item, index) => {
           return { id: idchunks[index], value: item.outString }

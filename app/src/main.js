@@ -116,6 +116,7 @@ window.revlocalise.init = function( config ) {
 
     sync.ensure( config, service ).then(({ data: syn_dictionary, settings }) => {
       createWidget() // create the widget
+      console.log(syn_dictionary)
       // when language is changed
       setLanguageChangeHandler(lang => {
         revlocalise.setLanguage(lang, syn_dictionary)
@@ -141,7 +142,7 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
       attrs_empty = Object.keys(attrs).length === 0,
       entries = window.revlocalise.obs_dictionary.entries;
   
-  if(nodes_empty || attrs_empty) manualTranslate()
+  //if(nodes_empty || attrs_empty) manualTranslate()
 
   objForEach(nodes, (val, key) => {
     let id = nodeId(val.ref, val.ref.__revloc__.value)
