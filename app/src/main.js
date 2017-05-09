@@ -141,8 +141,6 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
       nodes_empty = Object.keys(nodes).length === 0,
       attrs_empty = Object.keys(attrs).length === 0,
       entries = window.revlocalise.obs_dictionary.entries;
-  
-  //if(nodes_empty || attrs_empty) manualTranslate()
 
   objForEach(nodes, (val, key) => {
     let id = nodeId(val.ref, val.ref.__revloc__.value)
@@ -158,7 +156,6 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
     }
   })
   
-
   if(!syn_dictionary) setLanguageChangeHandler(lang)
 }
 
@@ -167,10 +164,6 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
 
 // get library version
 window.revlocalise.getVersion = function() { return "0.0.1" }
-
-
-
-
 
 
 // temporary debug helpers

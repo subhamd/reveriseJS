@@ -10,29 +10,6 @@ function factory(config) {
   return {
     // submit all data to the backend
     submit(data) {
-
-      // request payload
-      // let req_data = {
-      //   url: normalizedLocation(),
-      //   dict_key: dictKey(),
-      //   data: {}
-      // }
-      
-      // if no data passed, then walk the dom and find text/attribute nodes 
-      // if(!data)
-      // nodeTreeWalker(document, node => {
-      //   let id = nodeId(node),
-      //       pos = nodePos(node)
-
-      //   req_data.data[id] = {
-      //     id,
-      //     value: node.textContent,
-      //     url: normalizedLocation(),
-      //     capture_url: location.href,
-      //     nodePos: pos
-      //   }
-      // })
-
       // 5 min timeout for translation to happen on the backend
       return post(`${base_url}submit`, data, { ...headers, timeout: (5 * 60000) })
     },
