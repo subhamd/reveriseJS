@@ -1,62 +1,25 @@
 import '../styles/main.scss'
 
+import './modules/DOM_Patch'
 import observer from './modules/observer'
 import createService from './modules/services'
 import { nodeTreeWalker } from './modules/walker'
 import { objForEach, now } from './modules/utils'
-import createSynchronizer from './modules/sync-agent'
 import { languages, available_langs } from './modules/langs'
-import { setObject, getObject } from './modules/storage-man'
+import { setObject, getObject, storageInit } from './modules/storage-man'
 import { nodeId, nodePos, dictKey, absNodePos } from './modules/keygen'
 import createWidget, { setLanguageChangeHandler } from './modules/widget'
+
+import { getPullStream } from './modules/pullStream'
+import { getPushStream } from './modules/pushStream'
+
+// ensure default settings are present at the backend
+storageInit()
 
 // retrieve cached dictionary and settings
 let obs_dictionary = getObject(dictKey()) || { entries: null, ids: [] },
     settings = getObject('__settings__') || { currentLang: 'value' },
     translated_nodes = {};
-
-// DOM patching 
-let originalCloneNode = Node.prototype.cloneNode
-Node.prototype.cloneNode = function(deep) {
-  let temp_node = null,
-      text_nodes = []
-  
-  // if this is a text node, no need to traverse the tree which is expensive 
-  if(this.nodeType === 2 && this.nodeType === 3 && this.__revloc__) {
-    this.__revloc__.__temp__ = this.nodeValue
-    temp_node = originalCloneNode.call(this, deep)
-    this.nodeValue = this.__revloc__.__temp__
-    this.__revloc__.__temp__ = null
-    return temp_node
-  }
-  
-  // collect all the text nodes 
-  nodeTreeWalker(this, n => {
-    text_nodes.push(n)
-  })
-  
-  // restore to original text before copying 
-  text_nodes.forEach(t => {
-    if(t.__revloc__) {
-      t.__revloc__.__temp__ = t.nodeValue
-      t.nodeValue = t.__revloc__.value
-    }
-  })
-  
-  // clone using native method 
-  temp_node = originalCloneNode.call(this, deep)
-  text_nodes.forEach(t => {
-    if(t.__revloc__) {
-      t.nodeValue = t.__revloc__.__temp__
-      t.__revloc__.__temp__ = null
-    }
-  })
-  
-  text_nodes = [] // free the memory 
-  return temp_node // return modified node 
-}
-
-
 
 
 // revlocalise instance
@@ -111,24 +74,30 @@ window.revlocalise.init = function( config ) {
 
 
   window.onload = () => {
-
-    let sync = createSynchronizer()
-
-    sync.ensure( config, service ).then(({ data: syn_dictionary, settings }) => {
+    // start pull string 
+    getPullStream(service).subscribe(({ dictionary, settingst }) => {
       createWidget() // create the widget
-      console.log(syn_dictionary)
+
       // when language is changed
       setLanguageChangeHandler(lang => {
-        revlocalise.setLanguage(lang, syn_dictionary)
+        revlocalise.setLanguage(lang, true)
       })
     })
+
+    // push stream will emit new submit data
+    getPushStream(obs_dictionary, window.revlocalise.live_nodes.processed_nodes, window.revlocalise.live_nodes.processed_attrs).subscribe(pushData => {
+      console.log(pushData)
+      // do ajax
+      // call pushData.continue()
+    })
+
   }
 }
 
 
 
 // change translation language
-window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
+window.revlocalise.setLanguage = function( lang, called_internally ) {
 
   if(available_langs.indexOf(lang) == -1 || window.revlocalise.obs_dictionary.entries == null) 
     return false
@@ -156,10 +125,8 @@ window.revlocalise.setLanguage = function( lang, syn_dictionary ) {
     }
   })
   
-  if(!syn_dictionary) setLanguageChangeHandler(lang)
+  if(!called_internally) setLanguageChangeHandler(lang)
 }
-
-
 
 
 // get library version
@@ -191,6 +158,9 @@ window.revlocalise.showDictKeys = function() {
 window.revlocalise.showSettings = function() {
   console.log(getObject('__settings__'))
 }
+
+
+
 
 
 //

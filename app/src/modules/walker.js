@@ -1,5 +1,8 @@
+import { Observable } from 'rxjs/Observable'
+import 'rxjs/add/operator/map'
+
 let restrictedElements = ['SCRIPT', 'STYLE', 'OBJECT', 'EMBED'],
-      allowedAttrs    = ['placeholder', 'title']; // visible attributes 
+    allowedAttrs    = ['placeholder', 'title']; // visible attributes 
 
 // filter allowed nodes 
 export function is_allowed(n) {
@@ -46,3 +49,7 @@ export function nodeTreeWalker(node, cb) {
 
   rec(node)
 }
+
+
+
+
