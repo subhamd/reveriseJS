@@ -11,6 +11,7 @@ function updateStorage( response ) {
 	}
 	// before setting check quota and delete old dictionaries if required
 	setObject(dictKey(), transformed_data)
+	return transformed_data
 }
 
 export function getPullStream(service) {
@@ -26,14 +27,14 @@ export function getPullStream(service) {
 		.then(response => {
 
 			if(response.update_status === 'UPDATE_AVAILABLE') {
-			  updateStorage(response)
-			  observer.next({ dictionary: response.published, settings: getObject('__settings__') })
+			  let stored = updateStorage(response)
+			  observer.next({ dict: stored, settings: getObject('__settings__') })
 			  observer.complete() // may be check update at regular interval TBD
 			  return
 			}
 
 			if(response.update_status === 'UPDATE_UNAVAILABLE') {
-			  observer.next({ dictionary: cached, settings: getObject('__settings__') })
+			  observer.next({ dict: cached, settings: getObject('__settings__') })
 			  observer.complete() // may be check update at regular interval TBD
 			  return
 			}
@@ -45,7 +46,7 @@ export function getPullStream(service) {
 			  // clear this dictionary 
 			  localStorage.removeItem(dict_key)
 			  
-			  observer.next({ dictionary: null, settings: getObject('__settings__') })
+			  observer.next({ dict: null, settings: getObject('__settings__') })
 			  observer.complete() // may be check update at regular interval TBD
 			  return
 			}

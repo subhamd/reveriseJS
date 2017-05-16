@@ -8,7 +8,6 @@ import { objForEach, _g, _m, now, success, fail } from './utils'
 // used to keep track of submit requests 
 let busyApps = {}
 
-
 // creates app routes
 export default function makeRoutes(app) {
 

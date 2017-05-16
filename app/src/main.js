@@ -21,6 +21,26 @@ let dictionary      = getObject(dictKey()) || { entries: null, ids: [] },
     settings        = getObject('__settings__') || { currentLang: 'value' },
     content_nodes   = {};
 
+// translate the page
+function translatePage() {
+  let nodes       = content_nodes.processed_nodes,
+      attrs       = content_nodes.processed_attrs,
+      entries     = dictionary.entries;
+
+  objForEach(nodes, (val, key) => {
+    let id = nodeId(val.ref, val.ref.__revloc__.value)
+    if(entries[id] &&  val.ref.__revloc__) {
+      val.ref.nodeValue = entries[id][settings.currentLang]
+    }
+  })
+
+  objForEach(attrs, (val, key) => {
+    let id = nodeId(val.ref, val.ref.__revloc__.value)
+    if(entries[id] &&  val.ref.__revloc__) {
+      val.ref.nodeValue = entries[id][settings.currentLang]
+    }
+  })
+}
 
 // revlocalise instance
 window.revlocalise = window.revlocalise || {}
@@ -45,8 +65,16 @@ window.revlocalise.init = function( config ) {
   // page load handler
   window.onload = () => {
     // start pull string 
-    getPullStream(service).subscribe(({ dictionary, settings }) => {
+    getPullStream(service).subscribe(({ dict, settings }) => {
       createWidget() // create the widget
+
+      if(dict && dict.entries) {
+        dictionary.entries = dict.entries
+        dictionary.ids = dict.ids
+        dictionary.updatedOn = dict.updatedOn
+
+        translatePage()
+      }
 
       // when language is changed
       setLanguageChangeHandler(lang => {

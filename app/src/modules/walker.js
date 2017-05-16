@@ -9,6 +9,7 @@ export function is_allowed(n) {
   let allowed = true
   
   if(n.parentElement && restrictedElements.indexOf(n.parentElement.nodeName) != -1) return false
+  if(n.parentElement && n.parentElement.dataset.nolocalize) return false
   if(restrictedElements.indexOf(n.nodeName) !== -1) allowed = false
   if(n.dataset && n.dataset.nolocalize) allowed = false
 
