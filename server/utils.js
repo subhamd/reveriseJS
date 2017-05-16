@@ -9,6 +9,10 @@ export function objForEach(obj, cb) {
   }
 }
 
+export function empty(o) {
+  return (Object.keys(o).length == 0 && o.constructor === Object) ? true : false 
+}
+
 // return current timestamps
 export function now() {
   return (new Date()).getTime().toFixed(0)
@@ -58,12 +62,18 @@ export function _g(obj, path) {
 }
 
 
+// API helper functions 
+export function success(message, res_obj = {}) {
+  res_obj.success = true
+  res_obj.message = message
+  return res_obj
+}
 
-
-
-
-
-
+export function fail(message, res_obj = {}) {
+  res_obj.success = false
+  res_obj.message = message
+  return res_obj
+}
 
 
 

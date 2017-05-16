@@ -3,9 +3,9 @@ import dbc from '../db'
 import Promise from 'bluebird'
 import objectAssign from 'object-assign'
 import translation from '../translationService'
-import { _m, _g, objForEach, now } from '../utils'
+import { _m, _g, objForEach, now, success, fail, empty } from '../utils'
 
-
+// factory method
 export default function strManagerFactory() {
 
   let _langs = ['hindi', 'bengali', 'assamese', 'gujarati', 'kannada', 'marathi', 'malayalam', 'odia', 'telugu', 'tamil', 'punjabi'],
@@ -31,16 +31,16 @@ export default function strManagerFactory() {
     // _availableLang is the order of promise seriese
     if(new_string_entries.length) {
 
+      // call translation for each available langiages 
       _availableLang.forEach(lang => {
         translate_promises.push(translation(new_string_entries, lang))
       })
-
+      
+      // when all the requests are processed 
       return Promise.all(translate_promises)
         .then(responses => { //array of array of strings
-
           // update dictionary timestamp
           dict.__meta__.lastUpdated = now()
-
           // update entries with translated strings
           _availableLang.forEach((lang, index) => {
             responses[index].forEach((response, index) => {
@@ -49,7 +49,6 @@ export default function strManagerFactory() {
               new_string_entries[index]['status'] = 'processed'
             })
           })
-
           // update the input dict
           new_string_entries.forEach(entry => dict.entries.push(entry))
           return { dict, new_string_entries }
@@ -166,15 +165,19 @@ export default function strManagerFactory() {
 
         published.forEach(d => {
           if(d.status == 'published') {
+            // exclude unneeded meta data from response
+            delete d.url
             delete d.history
+            delete d.capture_url
+
             map[d.id] = d
           }
           ids[d.id] = true
         })
 
         return {
-          published: map,
           ids,
+          published: map,
           updatedOn: dict.__meta__.lastUpdated
         }
       })
@@ -206,27 +209,108 @@ export default function strManagerFactory() {
     bulkUpdate (dict_key, node_keys, new_value) {
       let allUpdates = [],
           db = null,
+          curated_new_value = {},
           updatable = {
             $set: { '__meta__.lastUpdated': now(), 'entries.$.lastUpdated': now() },
-            $push: { 'entries.$.history': { lastUpdated: now(), new_value } }
-          }
+            $push: { 'entries.$.history': { lastUpdated: now(), curated_new_value } }
+          };
 
       return dbc.connect()
         .then(_db => {
           db = _db
 
-          // dont forget to validate new data before proceeding
-
           objForEach(new_value, (value, key) => {
-            updatable.$set[`entries.$.${key}`] = value
+            // validate before adding to update query  
+            if(_availableLang.indexOf(key) != -1 && (typeof value === 'string')) {
+              updatable.$set[`entries.$.${key}`] = value
+              curated_new_value[key] = value
+            }
           })
 
           // cannot update multiple array elements at one go thus call update multiple time
-          node_keys.forEach(node_key =>
+          node_keys.forEach(node_key => {
+            console.log(curated_new_value)
             allUpdates.push(db.collection('STRINGS').update({ id: dict_key, 'entries.id': node_key }, updatable))
-          )
+          })
+
           return Promise.all(allUpdates)
         })
+    },
+    
+    // update all similar nodes 
+    updateAllSimilar(apikey, appid, value, node_data) {
+      let db      = null,
+          updates = null,
+          curated_node_data = {};
+      
+      // validate data: only language key values are allowed 
+      objForEach(node_data, (val, key) => {
+        if(_availableLang.indexOf(key) != -1 && (typeof val === 'string')) {
+          curated_node_data[key] = val 
+        }
+      })
+
+      // nothing to update 
+      if(empty(curated_node_data)) return Promise.resolve([])
+
+      return dbc.connect().then(_db => {
+        db = _db
+        return db.collection('APPS').findOne({ apikey, id: appid })
+      })
+      .then(app => {
+        let dicts = app.dictionaries
+        if(dicts.length) return dicts.map(a => a.id)
+        return []
+      })
+      .then(dict_ids => {
+        let entry_ids = []
+
+        dict_ids.forEach(did => {
+          let f = db.collection('STRINGS').findOne({ id: did, entries: { $elemMatch: { value: value } } }, { _id: 0, id: 1, entries: { $elemMatch: { value: value } }, "entries.id": 1, "entries.value": 1 })
+          entry_ids.push(f)
+        })
+        
+        // wait till all entry update finish
+        return Promise.all(entry_ids).then(docs => {
+          return docs.filter(d => d != null).map(doc => {
+            return {
+              doc_id: doc.id,
+              entry_ids: doc.entries.map(e => e.id)
+            }
+          })
+        })
+      })
+      .then(dict_entries => {
+        // promises
+        let update_promises = []
+
+        // for each dictionary
+        dict_entries.forEach(dict_entry => {
+
+          // update the dictionary last update time 
+          update_promises.push(db.collection('STRINGS').update({ id: dict_entry.doc_id }, { $set: { "__meta__.lastUpdated": now() } })
+          .then(r => {
+            return Promise.resolve({ dict: true, ...r.result })
+          }))
+
+          // for each entries 
+          dict_entry.entry_ids.forEach((entry, index) => {
+            let eid = dict_entry.entry_ids[index] // get the entry id
+            let update_clause = {} // initialize update info 
+
+            // prepare updateable data 
+            objForEach(curated_node_data, (val, key) => {
+              update_clause['entries.$.' + key] = val
+            })
+
+            // update the node value
+            update_promises.push(db.collection('STRINGS').update({ id: dict_entry.doc_id, entries: { $elemMatch: { id: eid } } }, { $set: update_clause }))
+          })
+        })
+        
+        // return the update result
+        return Promise.all(update_promises)
+      })
     },
 
     // update a single node
@@ -249,7 +333,8 @@ export default function strManagerFactory() {
         return db.collection('STRINGS').update({ id: dict_key, 'entries.id': node_key }, updatable)
       })
     },
-
+    
+    // get dictionary id and page url tuples
     getDicts(apikey, appid) {
       let db = null
       return dbc.connect()
@@ -265,8 +350,8 @@ export default function strManagerFactory() {
         return dicts.map(d => ({ key: d.id, url: d.__meta__.url }))
       })
     }
-  }
-}
+  } // end of return
+} // end of factory
 
 
 

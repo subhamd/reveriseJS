@@ -1,5 +1,9 @@
 import Promise from 'promise-polyfill'
 
+export function empty(o) {
+  return (Object.keys(o).length == 0 && o.constructor === Object) ? true : false 
+}
+
 // iterate objects
 export function objForEach(obj, cb) {
   let index = 0

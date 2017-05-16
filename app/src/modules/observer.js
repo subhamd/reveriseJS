@@ -22,7 +22,7 @@ export default function (dictionary, settings ) {
   if(!dictionary.ids) dictionary.ids = []
   if(!dictionary.entries) dictionary.entries = {}
 
-  submitted_node_ids      = dictionary.ids
+  submitted_node_ids = dictionary.ids
   published_entries  = dictionary.entries
     
   // use stream
