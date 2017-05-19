@@ -6,34 +6,35 @@ import createService from './modules/services'
 import { nodeTreeWalker } from './modules/walker'
 import { objForEach, now, empty } from './modules/utils'
 import { languages, available_langs } from './modules/langs'
-import { setObject, getObject, storageInit } from './modules/storage-man'
 import { nodeId, nodePos, dictKey, absNodePos } from './modules/keygen'
+import { setObject, getObject, storageInit } from './modules/storage-man'
 import createWidget, { setLanguageChangeHandler } from './modules/widget'
 
 import { getPullStream } from './modules/pullStream'
 import { getPushStream } from './modules/pushStream'
 
 // ensure default settings are present at the backend
-storageInit()
+storageInit(12)
 
 // retrieve cached dictionary and settings
 let dictionary      = getObject(dictKey()) || { entries: null, ids: [] },
     settings        = getObject('__settings__') || { currentLang: 'value' },
     content_nodes   = {};
 
-// translate the page
+// translate the page with current dictionary data 
 function translatePage() {
   let nodes       = content_nodes.processed_nodes,
       attrs       = content_nodes.processed_attrs,
       entries     = dictionary.entries;
-
+  // translate nodes 
   objForEach(nodes, (val, key) => {
     let id = nodeId(val.ref, val.ref.__revloc__.value)
     if(entries[id] &&  val.ref.__revloc__) {
       val.ref.nodeValue = entries[id][settings.currentLang]
     }
   })
-
+  
+  // translate attributes
   objForEach(attrs, (val, key) => {
     let id = nodeId(val.ref, val.ref.__revloc__.value)
     if(entries[id] &&  val.ref.__revloc__) {
@@ -60,19 +61,19 @@ window.revlocalise.init = function( config ) {
   
   // start observing
   content_nodes = observer(dictionary, settings, service)
-
   
   // page load handler
   window.onload = () => {
     // start pull string 
     getPullStream(service).subscribe(({ dict, settings }) => {
       createWidget() // create the widget
-
+      
+      // if dictionary is available then
       if(dict && dict.entries) {
         dictionary.entries = dict.entries
         dictionary.ids = dict.ids
         dictionary.updatedOn = dict.updatedOn
-
+        // translate the page again 
         translatePage()
       }
 
@@ -83,25 +84,42 @@ window.revlocalise.init = function( config ) {
     })
 
     // push stream will emit new submit data
-    getPushStream(dictionary, content_nodes.processed_nodes, content_nodes.processed_attrs, settings).subscribe(pushData => {
-      // if we got new data then 
-      if(pushData.result) {
-        //do ajax
-        console.log(pushData)
-      }
+    getPushStream(dictionary, 
+      content_nodes.processed_nodes, 
+      content_nodes.processed_attrs, 
+      settings).subscribe(pushData => {
+        if(pushData.result) {
+          console.log("Submit started.")
+          pushData.block()
 
-      pushData.continue() // continue regardless
-    })
+          service.submit(pushData.req_body)
+          .then(r => {
+            if(r.success) {
+              console.log(r)
+              console.log("Done.")
+              
+              // update dictionary data 
+              dictionary.entries = r.published 
+              dictionary.ids = r.ids
+              dictionary.updatedOn = r.updatedOn
 
+              pushData.continue()
+            }
+          })
+          .catch(err => {
+            console.log(err)
+            pushData.continue()
+          })
+        }
+      })
   }
 }
-
-
 
 // change translation language
 window.revlocalise.setLanguage = function( lang, called_internally ) {
 
   if(available_langs.indexOf(lang) == -1 || empty(dictionary.entries)) return false
+  if(lang == settings.currentLang) return true
 
   settings.currentLang = lang == 'english' ? 'value' : lang
   setObject('__settings__', settings)
@@ -127,10 +145,8 @@ window.revlocalise.setLanguage = function( lang, called_internally ) {
   if(!called_internally) setLanguageChangeHandler(lang)
 }
 
-
 // get library version
 window.revlocalise.getVersion = function() { return "0.0.1" }
-
 
 // temporary debug helpers
 window.revlocalise.showSettings = function() {
@@ -157,9 +173,5 @@ window.revlocalise.showDictKeys = function() {
 window.revlocalise.showSettings = function() {
   console.log(getObject('__settings__'))
 }
-
-
-
-
 
 //

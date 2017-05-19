@@ -1,7 +1,6 @@
 import express from 'express'
 import config from './config'
 import makeRoutes from './routes'
-import db from './db'
 
 // create app instance
 let app = express()

@@ -5,6 +5,14 @@ import bodyParser from 'body-parser'
 import strManagerFactory from './models/strManager'
 import { objForEach, _g, _m, now, success, fail } from './utils'
 
+/*
+ ************************************
+ ************************************
+ ** APPLICATION ROUTES DEFINATIONS **
+ ************************************
+ ************************************
+ */
+
 // used to keep track of submit requests 
 let busyApps = {}
 
@@ -75,7 +83,7 @@ export default function makeRoutes(app) {
   app.post('/submit', auth, (req, res) => {
     // reject if busy
     if(busyApps[req.appid]) {
-      res.json({ success: false, msg: 'Busy serving previous request' })
+      res.json(success('Busy serving previous request'))
       return
     }
     // enter busy state
@@ -163,17 +171,6 @@ export default function makeRoutes(app) {
       res.json(fail(err.message))
     })
   })
-
 }
 
-
-
-
-
-
-
-
-
-
-
-//
+// end

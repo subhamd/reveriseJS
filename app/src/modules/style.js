@@ -3,70 +3,72 @@
 */
 export const style =
 `
-#rev-lang * {
-  margin:0;
-  padding:0;
-}
-
-#rev-lang {
-	background: #004050;
-	width: 70px;
-
-	border-radius: 3px;
-	text-align:center;
-	position:fixed;
-	bottom:1px;
+#reverise-container {
+  position: fixed;
+  z-index: 99999999;
+  background-color: #444;
+  overflow: hidden;
+  border-radius: 3px;
+  color: #AAA;
+  bottom: 0;
   right: 1em;
-
-	color: white;
-	box-shadow:
-		0 5px 15px 1px rgba(0, 0, 0, 0.4),
-		0 0 200px 1px rgba(255, 255, 255, 0.5);
-  z-index: 9999999;
-  transition: all .3s;
-  opacity: .5;
 }
-
-#rev-lang:hover {
-  opacity:1;
+#reverise-container.light {
+  background-color: #FFF;
+  color: #888;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
-
-#rev-lang h3 {
-	font-size: 15px;
-	line-height: 60px;
-	border-radius: 3px;
-	cursor: pointer;
-	background: #003040;
-	background: linear-gradient(#003040, #002535);
+#reverise-container.left {
+  left: 0;
+  right: auto;
+  top: 50vh;
+  bottom: auto;
+  transform: translateY(-50%);
 }
-
-#rev-lang h3:hover {
-	text-shadow: 0 0 1px rgba(255, 255, 255, 0.8);
+#reverise-container.right {
+  left: auto;
+  right: 0;
+  top: 50vh;
+  bottom: auto;
+  transform: translateY(-50%);
 }
-
-#rev-lang li {
-	list-style-type: none;
+#reverise-container.bottom-left {
+  left: 1em;
+  right: auto;
 }
-
-#rev-lang ul ul {
-  overflow:hidden;
-  transition: height .3s;
+#reverise-container.light #reverise-container--header {
+  color: #222;
+  border-bottom: solid 1px #EEE;
+}
+#reverise-container #reverise-container--header {
+  height: 3em;
+  text-align: center;
+  line-height: 3em;
+  cursor: default;
+  font-weight: bold;
+  border-bottom: solid 1px #555;
+  color: white;
   user-select: none;
 }
-
-#rev-lang ul ul li a {
-	color: white;
-	text-decoration: none;
-	font-size: 16px;
-	line-height: 36px;
-	display: block;
-	transition: all 0.20s;
+#reverise-container.light ul li {
+  border-bottom: solid 1px #EEE;
 }
-
-#rev-lang ul ul li a:hover,
-#rev-lang ul ul li.active a {
-	background: #003545;
-	border-left: 5px solid lightgreen;
+#reverise-container.light ul li.active, #reverise-container.light ul li:hover {
+  color: #222;
+}
+#reverise-container ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  transition: all .4s ease-in;
+}
+#reverise-container ul li {
+  padding: .5em 1em;
+  cursor: pointer;
+  border-bottom: solid 1px #555;
+}
+#reverise-container ul li.active, #reverise-container ul li:hover {
+  color: #FFF;
 }
 
 `;

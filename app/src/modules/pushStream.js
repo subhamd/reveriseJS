@@ -51,20 +51,21 @@ export function getPushStream(dictionary, processedNodes, processedAttrs, settin
 	return Observable.create(observer => {
 		intervalId = setInterval(() => {
 			if(busy) {
-				console.log('Not pushing, either busy or no new nodes found')
-				observer.next({ result: false, continue: exitBusy })
+				console.log('The previous submit request is going on.')
+				observer.next({ result: false, continue: exitBusy, block: enterBusy })
 				return
 			}
 
-			busy = true, num_nodes = 0
+			num_nodes = 0
 			let req_body = { url: normalizedLocation(), dict_key: dictKey(), data: {} }
 
-		    // get all the new nodes 
+		    // search for all the new nodes 
 		    objForEach(processedNodes, (val, key) => pickReqData(key, val, req_body))
-		    // get all the new attributes 
+		    // search for all the new attributes 
 		    objForEach(processedAttrs, (val, key) => pickReqData(key, val, req_body))
 			
-		    if(num_nodes > 0) observer.next({ result: true, continue: exitBusy, req_body })
+		    if(num_nodes > 0) 
+		    	observer.next({ result: true, continue: exitBusy, block: enterBusy, req_body })
 		}, 3000)
 		
 		// the dispose method

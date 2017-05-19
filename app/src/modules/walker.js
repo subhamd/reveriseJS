@@ -10,8 +10,8 @@ export function is_allowed(n) {
   
   if(n.parentElement && restrictedElements.indexOf(n.parentElement.nodeName) != -1) return false
   if(n.parentElement && n.parentElement.dataset.nolocalize) return false
-  if(restrictedElements.indexOf(n.nodeName) !== -1) allowed = false
-  if(n.dataset && n.dataset.nolocalize) allowed = false
+  if(restrictedElements.indexOf(n.nodeName) !== -1) return false
+  if(n.dataset && n.dataset.nolocalize) return false
 
   if( (n.nodeType === 2 || n.nodeType === 3) && n.nodeValue.trim() == '') return false
   if(n.nodeType === 2 && allowedAttrs.indexOf(n.nodeName) === -1) return false
