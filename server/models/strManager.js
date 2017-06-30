@@ -1,4 +1,3 @@
-import * as State from '../consts/stateTypes'
 import dbc from '../db'
 import Promise from 'bluebird'
 import objectAssign from 'object-assign'

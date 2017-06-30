@@ -31,6 +31,22 @@ export default function makeRoutes(app) {
     res.end('JS Localizer backend!')
   })
 
+  
+  // submit jobs 
+  app.post('/submit-job', auth, (req, res) => {
+    res.json({ body: req.body })
+  })
+
+
+
+
+
+
+
+
+
+
+
   // accepts strings, returns dictionary if newer
   app.post('/update-check', auth, (req, res) => {
     // check for update and if available send back the new data
@@ -171,6 +187,7 @@ export default function makeRoutes(app) {
       res.json(fail(err.message))
     })
   })
+
 }
 
 // end

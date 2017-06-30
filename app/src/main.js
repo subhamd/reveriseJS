@@ -66,7 +66,7 @@ window.revlocalise.init = function( config ) {
   window.onload = () => {
     // start pull string 
     getPullStream(service).subscribe(({ dict, settings }) => {
-      createWidget() // create the widget
+      createWidget(config) // create the widget
       
       // if dictionary is available then
       if(dict && dict.entries) {
@@ -89,6 +89,8 @@ window.revlocalise.init = function( config ) {
       content_nodes.processed_attrs, 
       settings).subscribe(pushData => {
         if(pushData.result) {
+          console.log(pushData)
+          // enable the following code to push data to the server
           console.log("Submit started.")
           pushData.block()
 

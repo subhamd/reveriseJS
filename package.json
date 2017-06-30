@@ -14,6 +14,7 @@
   "dependencies": {
     "babel-polyfill": "^6.22.0",
     "file-loader": "*",
+    "kue": "^0.11.6",
     "lz-string": "^1.4.4",
     "mutation-observer": "^1.0.2",
     "normalize-url": "^1.9.1",

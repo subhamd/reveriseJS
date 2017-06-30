@@ -1,0 +1,3 @@
+-	(hyphen)		for child selector
+aA	(camelcase)		for multi word component name
+--	(state)			as usual modifier

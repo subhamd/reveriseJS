@@ -24,8 +24,11 @@ const widgetHTML =
 `;
 
 // call this method from window.onload
-export default function create() {
+export default function create({ widgetPos, theme }) {
+
   let settings = getObject('__settings__')
+  let _widgetPos = widgetPos || 'bottom-right'
+  let _theme = theme || 'dark'
 
   // inject widget styles
   let styleElement = document.createElement('style'),
@@ -36,6 +39,8 @@ export default function create() {
   // inject widget html
   let widgetElement = document.createElement('div')
   widgetElement.id = "reverise-container"
+
+  widgetElement.className += (' ' + widgetPos + ' ' + _theme)
 
   widgetElement.innerHTML = widgetHTML
   document.body.appendChild(widgetElement)
@@ -59,7 +64,7 @@ export default function create() {
   document.querySelector('#reverise-container #reverise-container--header').textContent = document.querySelector(selectedLi).textContent
 
   // collapse/reveal logic
-  document.querySelector('#reverise-container #reverise-container--header').addEventListener('click', function(e) {
+  function toggleLangList(e) {
     let ul = document.querySelector('#reverise-container ul'),
     is_collapsed = ul.dataset.collapsed,
     height = ul.dataset.height
@@ -71,7 +76,9 @@ export default function create() {
       ul.style.height = '0px'
       ul.dataset.collapsed = true
     }
-  }, true)
+  }
+  
+  document.querySelector('#reverise-container #reverise-container--header').addEventListener('click', toggleLangList, true)
 
   document.querySelectorAll('#reverise-container ul li').forEach(a => a.addEventListener('click', e => e.preventDefault()))
   document.querySelectorAll('#reverise-container ul li').forEach((li, index, all_li) => {

@@ -10,7 +10,7 @@ function translate(entries, target_lang) {
       chunks = [],
       idchunks = [],
       i = 0, //index
-      c = 10, //chunk size
+      c = 50, //chunk size
       m = Number.parseInt(source_strings.length / c) //num chunk
 
   // break the data into chunks
@@ -23,7 +23,7 @@ function translate(entries, target_lang) {
   chunks.forEach((chunk, index) => {
     
     // to write the request json to file
-    //fs.writeFileSync(`./req-${index}.req`, JSON.stringify({ data: chunks[index] } ))
+    fs.writeFileSync(`./req-${index}.req`, JSON.stringify({ data: chunks[index] } ))
 
     promises.push(new Promise((resolve, reject) => {
       unirest.post(`${config.translationApiEndPoint}?target_lang=${target_lang}&source_lang=english&domain=3`)

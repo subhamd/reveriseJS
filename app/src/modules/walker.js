@@ -6,17 +6,26 @@ let restrictedElements = ['SCRIPT', 'STYLE', 'OBJECT', 'EMBED'],
 
 // filter allowed nodes 
 export function is_allowed(n) {
-  let allowed = true
   
+  // if parent element is in the restricted list
   if(n.parentElement && restrictedElements.indexOf(n.parentElement.nodeName) != -1) return false
-  if(n.parentElement && n.parentElement.dataset.nolocalize) return false
-  if(restrictedElements.indexOf(n.nodeName) !== -1) return false
-  if(n.dataset && n.dataset.nolocalize) return false
 
+  // if parent element has nolocalize attribute applied
+  if(n.parentElement && n.parentElement.dataset.nolocalize) return false
+
+  // if element is restricted
+  if(restrictedElements.indexOf(n.nodeName) !== -1) return false
+
+  // if this element has nolocalize attribute applied
+  if(n.dataset && n.dataset.nolocalize) return false
+  
+  // if empty node or not a valid text node 
   if( (n.nodeType === 2 || n.nodeType === 3) && n.nodeValue.trim() == '') return false
+
+  // if it us an attribute but not allowed
   if(n.nodeType === 2 && allowedAttrs.indexOf(n.nodeName) === -1) return false
 
-  return allowed
+  return true
 }
 
 // traverses a node for all childr text/attribute nodes
