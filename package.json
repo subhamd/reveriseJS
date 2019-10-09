@@ -45,7 +45,7 @@
     "mongodb": "^2.2.24",
     "node-sass": "^4.3.0",
     "nodemon": "^1.11.0",
-    "open": "^0.0.5",
+    "open": "^6.0.0",
     "postcss-loader": "^1.2.2",
     "sass-loader": "^4.1.1",
     "style-loader": "^0.13.1",
