@@ -43,7 +43,7 @@
     "html-webpack-plugin": "^2.26.0",
     "json-loader": "^0.5.4",
     "mongodb": "^2.2.24",
-    "node-sass": "^4.3.0",
+    "node-sass": "^7.0.0",
     "nodemon": "^1.11.0",
     "open": "^0.0.5",
     "postcss-loader": "^1.2.2",
